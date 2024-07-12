@@ -13,11 +13,11 @@ server(Port) :-
 
 % Home page handler
 home_page(_Request) :-
-    serve_file('pages/index.html').
+    serve_file('src/index.html').
 
 % Login page handler
 login_page(_Request) :-
-    serve_file('pages/login.html').
+    serve_file('src/login.html').
 
 % Helper predicate to serve HTML files
 serve_file(FilePath) :-
