@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js"></script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -30,6 +33,7 @@
         </p>
         <div class="mt-6">
           <button
+            id="login-button"
             class="bg-primary text-white p-3 border-2 border-black rounded-lg"
           >
             Login with Google
@@ -38,4 +42,50 @@
       </div>
     </div>
   </body>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBECIoLim1XcLVK25kYCxxwGH-_Q7W9rVo",
+      authDomain: "madang-7f36d.firebaseapp.com",
+      projectId: "madang-7f36d",
+      storageBucket: "madang-7f36d.appspot.com",
+      messagingSenderId: "797478379879",
+      appId: "1:797478379879:web:7785922297fa426869cfc2",
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    const loginButton = document.getElementById("login-button");
+
+    // Check for accessToken on page load
+    document.addEventListener("DOMContentLoaded", () => {
+      const accessToken = localStorage.getItem("accessToken");
+      if (accessToken) {
+        window.location.href = "/";
+      }
+    });
+
+    loginButton.addEventListener("click", () => {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const user = result.user;
+          user.getIdToken().then((token) => {
+            localStorage.setItem("accessToken", token);
+            window.location.href = "/";
+          });
+        })
+        .catch((error) => {
+          console.error("Error during sign-in:", error);
+        });
+    });
+  </script>
 </html>
