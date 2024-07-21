@@ -29,6 +29,8 @@
               background: "#ECE6C2",
               primary: "#73BDA8",
               secondary: "#D2A24C",
+              coklatMuda: "#CC6B49",
+              coklatTua: "#6F5643",
             },
           },
         },
@@ -39,19 +41,51 @@
     <div
       class="max-w-md mx-auto min-h-screen h-auto flex flex-col bg-white border-2 border-black rounded-t-lg relative"
     >
-      <div class="flex-1">
-        <h3>okebang</h3>
+      <div class="flex-1 p-6">
+        <div class="grid gap-4">
+          <h3 class="text-xl font-bold">Hello, <span id="greating"></span></h3>
+          <div class="bg-primary p-6 rounded-lg border-2 border-black">
+            <h4 class="font-bold">Your Balance</h4>
+            <p>100.000.000</p>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-[#2ecc71] p-4 rounded-lg border-2 border-black">
+              <h4 class="font-bold">Income</h4>
+              <p class="text-sm">100.000.000</p>
+            </div>
+            <div class="bg-coklatMuda p-4 rounded-lg border-2 border-black">
+              <h4 class="font-bold">Expense</h4>
+              <p class="text-sm">100.000.000</p>
+            </div>
+          </div>
+          <div class="grid gap-2">
+            <h2>History</h2>
+            <div class="grid gap-2">
+              <div
+                class="bg-white rounded-lg border-2 border-black p-3 flex justify-between"
+              >
+                <h3>Makanan</h3>
+                <p class="text-[#2ecc71]">100.000</p>
+              </div>
+              <div
+                class="bg-white rounded-lg border-2 border-black p-3 flex justify-between"
+              >
+                <h3>Minuman</h3>
+                <p class="text-[#2ecc71]">100.000</p>
+              </div>
+              <div
+                class="bg-white rounded-lg border-2 border-black p-3 flex justify-between"
+              >
+                <h3>Minuman</h3>
+                <p class="text-coklatMuda">- 100.000</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div
         class="w-full bg-secondary footer sticky bottom-0 z-50 grid gap-2 grid-cols-3 p-4 border-t-2 border-black rounded-t-xl"
       >
-        <div
-          class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer"
-          id="btn-report"
-        >
-          <i class="bx bx-file bx-md"></i>
-          <span class="text-sm">Laporan</span>
-        </div>
         <div
           class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer"
           id="btn-home"
@@ -61,10 +95,18 @@
         </div>
         <div
           class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer"
-          id="btn-budget"
+          id="btn-report"
         >
-          <i class="bx bx-wallet bx-md"></i>
-          <span class="text-sm">Budget</span>
+          <i class="bx bx-file bx-md"></i>
+          <span class="text-sm">Laporan</span>
+        </div>
+
+        <div
+          class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer"
+          id="btn-profile"
+        >
+          <i class="bx bx-user bx-md"></i>
+          <span class="text-sm">Profile</span>
         </div>
       </div>
     </div>
@@ -73,8 +115,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
     import {
       getAuth,
-      GoogleAuthProvider,
-      signInWithPopup,
+      onAuthStateChanged,
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 
     // Your web app's Firebase configuration
@@ -90,20 +131,40 @@
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+
+    // Function to capitalize the first letter of each word
+    function capitalizeName(name) {
+      return name.replace(/\b\w/g, (char) => char.toUpperCase());
+    }
 
     // Check for accessToken on page load
     document.addEventListener("DOMContentLoaded", () => {
       const accessToken = localStorage.getItem("accessToken");
+
       if (!accessToken) {
         window.location.href = "/login";
+        return;
       }
+
+      onAuthStateChanged(auth, (user) => {
+        console.log(user);
+        if (user) {
+          // User is signed in, get their display name and capitalize it
+          const displayName = user.displayName;
+          const capitalizedDisplayName = capitalizeName(displayName);
+          document.getElementById("greating").textContent =
+            capitalizedDisplayName;
+        } else {
+          // No user is signed in, redirect to login
+          window.location.href = "/login";
+        }
+      });
     });
 
     //button
     const reportButton = document.getElementById("btn-report");
     const homeButton = document.getElementById("btn-home");
-    const budgetButton = document.getElementById("btn-budget");
+    const profileButton = document.getElementById("btn-profile");
 
     // //event click
     reportButton.addEventListener("click", function () {
@@ -116,9 +177,9 @@
       window.location.href = "/";
     });
 
-    budgetButton.addEventListener("click", function () {
-      if (window.location.pathname === "/budget") return;
-      window.location.href = "/budget";
+    profileButton.addEventListener("click", function () {
+      if (window.location.pathname === "/profile") return;
+      window.location.href = "/profile";
     });
   </script>
 </html>
