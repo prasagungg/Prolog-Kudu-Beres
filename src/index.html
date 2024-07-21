@@ -4,337 +4,121 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TODO LIST</title>
+    <title>Madang - Home</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
       rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"
     />
-    <style>
-      *,
-      *::before,
-      *::after {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family: "Roboto", sans-serif;
-        height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-position: center;
-        background-size: cover;
-      }
-
-      .container {
-        width: 400px;
-        height: auto;
-        min-height: 400px;
-        padding: 30px;
-        background: transparent;
-        border: 2px solid #e6b7eca1;
-        border-radius: 10px;
-        backdrop-filter: blur(15px);
-      }
-
-      h1 {
-        color: #eee;
-        text-align: center;
-        margin-bottom: 36px;
-      }
-
-      .input-container {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 25px;
-      }
-
-      .todo-input {
-        flex: 1;
-        outline: none;
-        padding: 10px 10px 10px 20px;
-        background-color: transparent;
-        border: 2px solid #e6b7eca1;
-        border-radius: 30px;
-        color: #eee;
-        font-size: 16px;
-        margin-right: 10px;
-      }
-
-      .todo-input::placeholder {
-        color: #bfbfbf;
-      }
-
-      .add-button {
-        border: none;
-        outline: none;
-        background: #e6b7eca1;
-        color: #fff;
-        font-size: 35px;
-        cursor: pointer;
-        border-radius: 40px;
-        width: 40px;
-        height: 40px;
-      }
-
-      .empty-image {
-        margin: 55px auto 0;
-        display: block;
-      }
-
-      .todo {
-        list-style: none;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        background-color: #463c7b;
-        border-radius: 5px;
-        margin: 10px 0;
-        padding: 10px 12px;
-        border: 2px solid #e6b7eca1;
-        transition: all 0.2s ease;
-      }
-
-      .todo:first-child {
-        margin-top: 0;
-      }
-
-      .todo:last-child {
-        margin-bottom: 0;
-      }
-
-      .todo:hover {
-        background-color: #e6b7eca1;
-      }
-
-      .todo label {
-        cursor: pointer;
-        width: fit-content;
-        display: flex;
-        align-items: center;
-        font-family: "Roboto", sans-serif;
-        color: #eee;
-      }
-
-      .todo span {
-        padding-left: 20px;
-        position: relative;
-        cursor: pointer;
-      }
-
-      span::before {
-        content: "";
-        height: 20px;
-        width: 20px;
-        position: absolute;
-        margin-left: -30px;
-        border-radius: 100px;
-        border: 2px solid #e6b7eca1;
-      }
-
-      input[type="checkbox"] {
-        visibility: hidden;
-      }
-
-      input:checked + span {
-        text-decoration: line-through;
-      }
-
-      .todo:hover input:checked + span::before,
-      input:checked + span::before {
-        background: url(./check.svg) 50% 50% no-repeat #09bb21;
-        border-color: #09bb21;
-      }
-
-      .todo:hover span::before {
-        border-color: #eee;
-      }
-
-      .todo .delete-btn {
-        background-color: transparent;
-        border: none;
-        cursor: pointer;
-        color: #eee;
-        font-size: 24px;
-      }
-
-      .todos-container {
-        height: 300px;
-        overflow: overlay;
-      }
-
-      .todos-container::-webkit-scrollbar-track {
-        background: rgb(247, 247, 247);
-        border-radius: 20px;
-      }
-
-      .todos-container::-webkit-scrollbar {
-        width: 0;
-      }
-
-      .todos-container:hover::-webkit-scrollbar {
-        width: 7px;
-      }
-
-      .todos-container::-webkit-scrollbar-thumb {
-        background: #d5d5d5;
-        border-radius: 20px;
-      }
-
-      .filters {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 25px;
-      }
-
-      .filter {
-        color: #eee;
-        padding: 5px 15px;
-        border-radius: 100px;
-        border: 2px solid #e6b7eca1;
-        transition: all 0.2s ease;
-        cursor: pointer;
-      }
-
-      .filter.active,
-      .filter:hover {
-        background-color: #e6b7eca1;
-      }
-
-      .delete-all {
-        display: flex;
-        color: #eee;
-        padding: 7px 15px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
-
-      .delete-all:hover {
-        border-radius: 5px;
-        background-color: #e6b7eca1;
-      }
-    </style>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          fontFamily: {
+            sans: ['"Roboto Mono"'],
+          },
+          extend: {
+            colors: {
+              background: "#ECE6C2",
+              primary: "#73BDA8",
+              secondary: "#D2A24C",
+            },
+          },
+        },
+      };
+    </script>
   </head>
-  <body>
-    <div class="container">
-      <h1>Todo List</h1>
-      <div class="input-container">
-        <input class="todo-input" placeholder="Add a new task..." />
-        <button class="add-button">
-          <i class="fa fa-plus-circle"></i>
-        </button>
+  <body class="bg-background">
+    <div
+      class="max-w-md mx-auto min-h-screen h-auto flex flex-col bg-white border-2 border-black rounded-t-lg relative"
+    >
+      <div class="flex-1">
+        <h3>okebang</h3>
       </div>
-      <div class="filters">
-        <div class="filter" data-filter="completed">Complete</div>
-        <div class="filter" data-filter="pending">Incomplete</div>
-        <div class="delete-all">Delete All</div>
-      </div>
-      <div class="todos-container">
-        <ul class="todos"></ul>
-        <p class="empty-text" style="text-align: center">Tidak ada data</p>
+      <div
+        class="w-full bg-secondary footer sticky bottom-0 z-50 grid gap-2 grid-cols-3 p-4 border-t-2 border-black rounded-t-xl"
+      >
+        <div
+          class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer"
+          id="btn-report"
+        >
+          <i class="bx bx-file bx-md"></i>
+          <span class="text-sm">Laporan</span>
+        </div>
+        <div
+          class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer"
+          id="btn-home"
+        >
+          <i class="bx bx-home bx-md"></i>
+          <span class="text-sm">Home</span>
+        </div>
+        <div
+          class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer"
+          id="btn-budget"
+        >
+          <i class="bx bx-wallet bx-md"></i>
+          <span class="text-sm">Budget</span>
+        </div>
       </div>
     </div>
-    <script>
-      const input = document.querySelector("input");
-      const addButton = document.querySelector(".add-button");
-      const todosHtml = document.querySelector(".todos");
-      const emptyText = document.querySelector(".empty-text");
-      let todosJson = JSON.parse(localStorage.getItem("todos")) || [];
-      const deleteAllButton = document.querySelector(".delete-all");
-      const filters = document.querySelectorAll(".filter");
-      let filter = "";
-
-      showTodos();
-
-      function getTodoHtml(todo, index) {
-        if (filter && filter != todo.status) {
-          return "";
-        }
-        let checked = todo.status == "completed" ? "checked" : "";
-        return /* html */ `
-    <li class="todo">
-      <label for="${index}">
-        <input id="${index}" onclick="updateStatus(this)" type="checkbox" ${checked}>
-        <span class="${checked}">${todo.name}</span>
-      </label>
-      <button class="delete-btn" data-index="${index}" onclick="remove(this)"><i class="fa fa-times"></i></button>
-    </li>
-  `;
-      }
-
-      function showTodos() {
-        if (todosJson.length == 0) {
-          todosHtml.innerHTML = "";
-          emptyText.style.display = "block";
-        } else {
-          todosHtml.innerHTML = todosJson.map(getTodoHtml).join("");
-          emptyText.style.display = "none";
-        }
-      }
-
-      function addTodo(todo) {
-        input.value = "";
-        todosJson.unshift({ name: todo, status: "pending" });
-        localStorage.setItem("todos", JSON.stringify(todosJson));
-        showTodos();
-      }
-
-      input.addEventListener("keyup", (e) => {
-        let todo = input.value.trim();
-        if (!todo || e.key != "Enter") {
-          return;
-        }
-        addTodo(todo);
-      });
-
-      addButton.addEventListener("click", () => {
-        let todo = input.value.trim();
-        if (!todo) {
-          return;
-        }
-        addTodo(todo);
-      });
-
-      function updateStatus(todo) {
-        let todoName = todo.parentElement.lastElementChild;
-        if (todo.checked) {
-          todoName.classList.add("checked");
-          todosJson[todo.id].status = "completed";
-        } else {
-          todoName.classList.remove("checked");
-          todosJson[todo.id].status = "pending";
-        }
-        localStorage.setItem("todos", JSON.stringify(todosJson));
-      }
-
-      function remove(todo) {
-        const index = todo.dataset.index;
-        todosJson.splice(index, 1);
-        showTodos();
-        localStorage.setItem("todos", JSON.stringify(todosJson));
-      }
-
-      filters.forEach(function (el) {
-        el.addEventListener("click", (e) => {
-          if (el.classList.contains("active")) {
-            el.classList.remove("active");
-            filter = "";
-          } else {
-            filters.forEach((tag) => tag.classList.remove("active"));
-            el.classList.add("active");
-            filter = e.target.dataset.filter;
-          }
-          showTodos();
-        });
-      });
-
-      deleteAllButton.addEventListener("click", () => {
-        todosJson = [];
-        localStorage.setItem("todos", JSON.stringify(todosJson));
-        showTodos();
-      });
-    </script>
   </body>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBECIoLim1XcLVK25kYCxxwGH-_Q7W9rVo",
+      authDomain: "madang-7f36d.firebaseapp.com",
+      projectId: "madang-7f36d",
+      storageBucket: "madang-7f36d.appspot.com",
+      messagingSenderId: "797478379879",
+      appId: "1:797478379879:web:7785922297fa426869cfc2",
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    // Check for accessToken on page load
+    document.addEventListener("DOMContentLoaded", () => {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) {
+        window.location.href = "/login";
+      }
+    });
+
+    //button
+    const reportButton = document.getElementById("btn-report");
+    const homeButton = document.getElementById("btn-home");
+    const budgetButton = document.getElementById("btn-budget");
+
+    // //event click
+    reportButton.addEventListener("click", function () {
+      if (window.location.pathname === "/report") return;
+      window.location.href = "/report";
+    });
+
+    homeButton.addEventListener("click", function () {
+      if (window.location.pathname === "/") return;
+      window.location.href = "/";
+    });
+
+    budgetButton.addEventListener("click", function () {
+      if (window.location.pathname === "/budget") return;
+      window.location.href = "/budget";
+    });
+  </script>
 </html>
