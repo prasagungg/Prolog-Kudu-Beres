@@ -10,6 +10,7 @@ server(Port) :-
 % Define the routes
 :- http_handler(root(''), home_page, []).
 :- http_handler(root('login'), login_page, []).
+:- http_handler(root('report'), report_page, []).
 
 % Home page handler
 home_page(_Request) :-
@@ -18,6 +19,10 @@ home_page(_Request) :-
 % Login page handler
 login_page(_Request) :-
     serve_file('src/login.html').
+
+% Report page handler
+report_page(_Request) :-
+    serve_file('src/report.html').
 
 % Helper predicate to serve HTML files
 serve_file(FilePath) :-
