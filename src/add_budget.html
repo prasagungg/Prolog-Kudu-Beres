@@ -2,46 +2,70 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Madang - Home</title>
     <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap"
       rel="stylesheet"
     />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/js/tailwind.js"></script>
-    <title>Madang - Login</title>
   </head>
   <body class="bg-background">
-    <div class="max-w-md mx-auto h-screen grid place-content-center">
-      <div
-        class="w-full bg-white p-6 border-2 border-black rounded-lg text-center"
-      >
-        <h1 class="text-2xl">Welcome to Madang APP</h1>
-        <p>
-          Please log in to continue. You can use your Google Account for a quick
-          and easy experience.
-        </p>
-        <div class="mt-6">
-          <button
-            id="login-button"
-            class="bg-primary text-white p-3 border-2 border-black rounded-lg"
-          >
-            Login with Google
-          </button>
+    <div
+      class="max-w-md mx-auto min-h-screen h-auto flex flex-col bg-white border-2 border-black rounded-t-lg relative"
+    >
+      <div class="flex-1 p-6">
+        <div class="grid gap-4">
+          <div class="flex gap-2 items-center">
+            <i
+              class="bx bx-arrow-back bx-sm cursor-pointer"
+              onclick="history.back()"
+            ></i>
+            <h3 class="text-xl font-bold">Create Budget</h3>
+          </div>
+          <div class="grid gap-2">
+            <label class="text-sm">Category</label>
+            <input
+              type="input"
+              class="w-full h-full text-sm px-3 py-2.5 border-2 border-black rounded-lg focus:outline-none"
+              placeholder="Name Category"
+            />
+          </div>
+          <div class="grid gap-2">
+            <label class="text-sm">Balance</label>
+            <input
+              type="input"
+              class="w-full h-full text-sm px-3 py-2.5 border-2 border-black rounded-lg focus:outline-none"
+              placeholder="Amount Balance"
+            />
+          </div>
+          <div class="flex justify-end">
+            <button
+              class="bg-primary text-white p-1 border-2 border-black rounded-lg"
+            >
+              Submit
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </body>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
     import {
       getAuth,
-      GoogleAuthProvider,
-      signInWithPopup,
+      onAuthStateChanged,
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 
     // Your web app's Firebase configuration
@@ -57,29 +81,15 @@
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-    const loginButton = document.getElementById("login-button");
 
     // Check for accessToken on page load
     document.addEventListener("DOMContentLoaded", () => {
       const accessToken = localStorage.getItem("accessToken");
-      if (accessToken) {
-        window.location.href = "/";
-      }
-    });
 
-    loginButton.addEventListener("click", () => {
-      signInWithPopup(auth, provider)
-        .then((result) => {
-          const user = result.user;
-          user.getIdToken().then((token) => {
-            localStorage.setItem("accessToken", token);
-            window.location.href = "/";
-          });
-        })
-        .catch((error) => {
-          console.error("Error during sign-in:", error);
-        });
+      if (!accessToken) {
+        window.location.href = "/login";
+        return;
+      }
     });
   </script>
 </html>

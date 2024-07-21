@@ -18,25 +18,7 @@
       rel="stylesheet"
     />
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          fontFamily: {
-            sans: ['"Roboto Mono"'],
-          },
-          extend: {
-            colors: {
-              background: "#ECE6C2",
-              primary: "#73BDA8",
-              secondary: "#D2A24C",
-              coklatMuda: "#CC6B49",
-              coklatTua: "#6F5643",
-              softPrimary: "#99beb7",
-            },
-          },
-        },
-      };
-    </script>
+    <script src="/js/tailwind.js"></script>
   </head>
   <body class="bg-background">
     <div
@@ -46,71 +28,71 @@
         <div class="grid gap-4">
           <div class="bg-primary p-6 rounded-lg border-2 border-black">
             <div class="flex justify-between mb-2">
-                <div class="flex">
-                    <!-- <div class="bg-secondary w-10 h-10 rounded-full flex justify-center items-center">                        
+              <div class="flex">
+                <!-- <div class="bg-secondary w-10 h-10 rounded-full flex justify-center items-center">                        
                         <i class="bx bx-money-withdraw bx-md text-white"></i>
                     </div> -->
-                    <h5 class="ml-4 font-bold">Pemasukan</h5>
-                </div> 
-                <h4 class="font-bold">50000</h4>
+                <h5 class="ml-4 font-bold">Pemasukan</h5>
+              </div>
+              <h4 class="font-bold">50000</h4>
             </div>
             <div class="flex justify-between mb-2">
-                <div class="flex">
-                    <!-- <div class="bg-secondary w-10 h-10 rounded-full flex justify-center items-center">                        
+              <div class="flex">
+                <!-- <div class="bg-secondary w-10 h-10 rounded-full flex justify-center items-center">                        
                         <i class="bx bx-money-withdraw bx-md text-white"></i>
                     </div> -->
-                    <h5 class="ml-4 font-bold">Pengeluaran</h5>
-                </div> 
-                <h4 class="font-bold">30000</h4>
+                <h5 class="ml-4 font-bold">Pengeluaran</h5>
+              </div>
+              <h4 class="font-bold">30000</h4>
             </div>
-            <hr>
+            <hr />
             <div class="flex justify-between mt-2">
-                <div class="flex">
-                    <!-- <div class="bg-secondary w-10 h-10 rounded-full flex justify-center items-center">                        
+              <div class="flex">
+                <!-- <div class="bg-secondary w-10 h-10 rounded-full flex justify-center items-center">                        
                         <i class="bx bx-money-withdraw bx-md text-white"></i>
                     </div> -->
-                    <h5 class="ml-4 font-bold">Sisa Uang</h5>
-                </div> 
-                <h4 class="font-bold">20000</h4>
+                <h5 class="ml-4 font-bold">Sisa Uang</h5>
+              </div>
+              <h4 class="font-bold">20000</h4>
             </div>
           </div>
           <div class="grid gap-2">
-            <h2>Detail Pengeluaran</h2>    
+            <h2>Detail Pengeluaran</h2>
             <div class="grid gap-2">
-                <div class="bg-softPrimary p-6 rounded-lg border-2 border-black">
-                    <div class="flex justify-between">
-                        <h4 class="font-bold">23 June 2024</h4>
-                        <h4 class="font-bold">20000</h4>
-                    </div>
-                    <hr class="mb-4">
-                    <div class="flex justify-between mb-4">
-                        <div class="flex">
-                            <!-- <div class="bg-coklatMuda w-10 h-10 rounded-full flex justify-center items-center">                        
+              <div class="bg-softPrimary p-6 rounded-lg border-2 border-black">
+                <div class="flex justify-between">
+                  <h4 class="font-bold">23 June 2024</h4>
+                  <h4 class="font-bold">20000</h4>
+                </div>
+                <hr class="mb-4" />
+                <div class="flex justify-between mb-4">
+                  <div class="flex">
+                    <!-- <div class="bg-coklatMuda w-10 h-10 rounded-full flex justify-center items-center">                        
                                 <i class="bx bx-tennis-ball bx-md text-white"></i>
                             </div> -->
-                            <h5 class="ml-4 font-bold">Fitnes</h5>
-                        </div> 
-                        <h4 class="font-bold">10000</h4>
-                    </div>
-                    <div class="flex justify-between mb-4">
-                        <div class="flex">
-                            <!-- <div class="bg-primary w-10 h-10 rounded-full flex justify-center items-center">                        
+                    <h5 class="ml-4 font-bold">Fitnes</h5>
+                  </div>
+                  <h4 class="font-bold">10000</h4>
+                </div>
+                <div class="flex justify-between mb-4">
+                  <div class="flex">
+                    <!-- <div class="bg-primary w-10 h-10 rounded-full flex justify-center items-center">                        
                                 <i class="bx bx-bowl-rice bx-md text-white"></i>
                             </div> -->
-                            <h5 class="ml-4 font-bold">Food & Beverage</h5>
-                        </div> 
-                        <h4 class="font-bold">20000</h4>
-                    </div>        
-                    <div class="flex justify-between mb-4">
-                        <div class="flex">
-                            <!-- <div class="bg-secondary w-10 h-10 rounded-full flex justify-center items-center">                        
+                    <h5 class="ml-4 font-bold">Food & Beverage</h5>
+                  </div>
+                  <h4 class="font-bold">20000</h4>
+                </div>
+                <div class="flex justify-between mb-4">
+                  <div class="flex">
+                    <!-- <div class="bg-secondary w-10 h-10 rounded-full flex justify-center items-center">                        
                                 <i class="bx bx-money-withdraw bx-md text-white"></i>
                             </div> -->
-                            <h5 class="ml-4 font-bold">Salary</h5>
-                        </div> 
-                        <h4 class="font-bold">50000</h4>
-                    </div>       
+                    <h5 class="ml-4 font-bold">Salary</h5>
+                  </div>
+                  <h4 class="font-bold">50000</h4>
                 </div>
+              </div>
             </div>
           </div>
         </div>
