@@ -10,6 +10,9 @@ server(Port) :-
 % Define the routes
 :- http_handler(root(''), home_page, []).
 :- http_handler(root('login'), login_page, []).
+:- http_handler(root('add-budget'), add_budget_page, []).
+:- http_handler(root('budget'), add_budget_page, []).
+:- http_handler('/js/', serve_js, [prefix]).
 
 % Home page handler
 home_page(_Request) :-
@@ -18,6 +21,17 @@ home_page(_Request) :-
 % Login page handler
 login_page(_Request) :-
     serve_file('src/login.html').
+
+% budget page handler
+budget_page(_Request) :-
+    serve_file('src/budget.html').
+
+% budget page handler
+add_budget_page(_Request) :-
+    serve_file('src/add_budget.html').
+
+serve_js(Request) :-
+    http_reply_from_files('public/js', [], Request).
 
 % Helper predicate to serve HTML files
 serve_file(FilePath) :-
