@@ -84,29 +84,37 @@
         </div>
       </div>
       <div
-        class="w-full bg-secondary footer sticky bottom-0 z-50 grid gap-2 grid-cols-3 p-4 border-t-2 border-black rounded-t-xl"
+        class="w-full bg-secondary footer sticky bottom-0 z-50 grid gap-2 grid-cols-4 p-4 border-t-2 border-black rounded-t-xl"
       >
         <div
           class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer"
           id="btn-home"
         >
-          <i class="bx bx-home bx-md"></i>
-          <span class="text-sm">Home</span>
+          <i class="bx bx-home bx-sm"></i>
+          <span class="text-xs">Home</span>
         </div>
         <div
           class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer"
           id="btn-report"
         >
-          <i class="bx bx-file bx-md"></i>
-          <span class="text-sm">Laporan</span>
+          <i class="bx bx-file bx-sm"></i>
+          <span class="text-xs">Laporan</span>
         </div>
 
         <div
           class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer"
-          id="btn-profile"
+          id="btn-transaksi"
         >
-          <i class="bx bx-user bx-md"></i>
-          <span class="text-sm">Profile</span>
+          <i class="bx bx-money bx-sm"></i>
+          <span class="text-xs">Transaksi</span>
+        </div>
+
+        <div
+          class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer"
+          id="btn-budget"
+        >
+          <i class="bx bx-wallet bx-sm"></i>
+          <span class="text-xs">Budget</span>
         </div>
       </div>
     </div>
@@ -164,7 +172,8 @@
     //button
     const reportButton = document.getElementById("btn-report");
     const homeButton = document.getElementById("btn-home");
-    const profileButton = document.getElementById("btn-profile");
+    const transaksiButton = document.getElementById("btn-transaksi");
+    const budgetButton = document.getElementById("btn-budget");
 
     // //event click
     reportButton.addEventListener("click", function () {
@@ -177,9 +186,14 @@
       window.location.href = "/";
     });
 
-    profileButton.addEventListener("click", function () {
-      if (window.location.pathname === "/profile") return;
-      window.location.href = "/profile";
+    transaksiButton.addEventListener("click", function () {
+      if (window.location.pathname === "/transaksi") return;
+      window.location.href = "/transaksi";
+    });
+
+    budgetButton.addEventListener("click", function () {
+      if (window.location.pathname === "/budget") return;
+      window.location.href = "/budget";
     });
   </script>
 </html>
