@@ -8,11 +8,12 @@ server(Port) :-
     http_server(http_dispatch, [port(Port)]).
 
 % Define the routes
+:- http_handler('/js/', serve_js, [prefix]).
 :- http_handler(root(''), home_page, []).
 :- http_handler(root('login'), login_page, []).
 :- http_handler(root('add-budget'), add_budget_page, []).
 :- http_handler(root('budget'), add_budget_page, []).
-:- http_handler('/js/', serve_js, [prefix]).
+:- http_handler(root('report'), report_page, []).
 
 % Home page handler
 home_page(_Request) :-
@@ -30,8 +31,9 @@ budget_page(_Request) :-
 add_budget_page(_Request) :-
     serve_file('src/add_budget.html').
 
-serve_js(Request) :-
-    http_reply_from_files('public/js', [], Request).
+% Report page handler
+report_page(_Request) :-
+    serve_file('src/report.html').
 
 % Helper predicate to serve HTML files
 serve_file(FilePath) :-
@@ -39,5 +41,8 @@ serve_file(FilePath) :-
     format('Content-type: text/html~n~n'),
     format('~s', [FileContent]).
 
+serve_js(Request) :-
+    http_reply_from_files('public/js', [], Request).
+    
 % Entry point to start the server
 :- initialization(server(8080)).
