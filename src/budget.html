@@ -36,6 +36,9 @@
           <div id="budget-list" class="grid gap-3">
             <!-- Budget items will be inserted here -->
           </div>
+          <div id="empty-state" class="hidden text-center p-6">
+            <p class="text-gray-600">No budget items found.</p>
+          </div>
           <!-- Loading Spinner -->
           <div
             id="loading-spinner"
@@ -138,6 +141,7 @@
 
         const budgetList = document.getElementById("budget-list");
         const loadingSpinner = document.getElementById("loading-spinner");
+        const emptyState = document.getElementById("empty-state");
 
         // Show loading spinner
         loadingSpinner.classList.remove("hidden");
@@ -152,35 +156,41 @@
           // Clear the list before adding new items
           budgetList.innerHTML = "";
 
-          // Create a number formatter for the desired format
-          const numberFormatter = new Intl.NumberFormat("id-ID");
+          if (querySnapshot.empty) {
+            emptyState.classList.remove("hidden");
+          } else {
+            emptyState.classList.add("hidden");
 
-          querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            const formattedBalance = numberFormatter.format(data.balance);
+            // Create a number formatter for the desired format
+            const numberFormatter = new Intl.NumberFormat("id-ID");
 
-            const budgetItem = document.createElement("div");
-            budgetItem.classList.add(
-              "bg-primary",
-              "rounded-lg",
-              "border-2",
-              "border-black",
-              "p-3",
-              "flex",
-              "justify-between",
-              "items-center"
-            );
-            budgetItem.innerHTML = `
-        <div>
-          <h3 class="font-bold">${data.category}</h3>
-          <p class="text-sm">${formattedBalance}</p>
-        </div>
-        <button onclick="window.location.href = '/edit-budget?id=${doc.id}'">
-          <i class="bx bx-pencil bx-sm text-red"></i>
-        </button>
-      `;
-            budgetList.appendChild(budgetItem);
-          });
+            querySnapshot.forEach((doc) => {
+              const data = doc.data();
+              const formattedBalance = numberFormatter.format(data.balance);
+
+              const budgetItem = document.createElement("div");
+              budgetItem.classList.add(
+                "bg-primary",
+                "rounded-lg",
+                "border-2",
+                "border-black",
+                "p-3",
+                "flex",
+                "justify-between",
+                "items-center"
+              );
+              budgetItem.innerHTML = `
+                <div>
+                  <h3 class="font-bold">${data.category}</h3>
+                  <p class="text-sm">${formattedBalance}</p>
+                </div>
+                <button onclick="window.location.href = '/edit-budget?id=${doc.id}'">
+                  <i class="bx bx-pencil bx-sm text-red"></i>
+                </button>
+              `;
+              budgetList.appendChild(budgetItem);
+            });
+          }
         } catch (e) {
           console.error("Error loading budgets: ", e);
           alert("Error loading budgets. Please try again.");

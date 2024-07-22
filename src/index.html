@@ -7,6 +7,7 @@
     <title>Madang - Home</title>
     <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -19,6 +20,26 @@
     />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/js/tailwind.js"></script>
+    <style>
+      .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-left-color: #000;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      #loading-overlay {
+        display: none;
+      }
+    </style>
   </head>
   <body class="bg-background">
     <div
@@ -27,21 +48,32 @@
       <div class="flex-1 p-6">
         <div class="grid gap-4">
           <h3 class="text-xl font-bold">Hello, <span id="greating"></span></h3>
-          <div class="bg-primary p-6 rounded-lg border-2 border-black">
-            <h4 class="font-bold">Your Balance</h4>
-            <p>100.000.000</p>
+          <!-- Loading Spinner -->
+          <div
+            id="loading-spinner"
+            class="flex justify-center items-center hidden"
+          >
+            <div
+              class="w-12 h-12 border-t-4 border-primary border-solid rounded-full animate-spin"
+            ></div>
           </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div class="bg-[#2ecc71] p-4 rounded-lg border-2 border-black">
-              <h4 class="font-bold">Income</h4>
-              <p class="text-sm">100.000.000</p>
+          <div id="budget-section" class="grid gap-2 hidden">
+            <div class="bg-primary p-6 rounded-lg border-2 border-black">
+              <h4 class="font-bold">Your Balance</h4>
+              <p id="balance">0</p>
             </div>
-            <div class="bg-coklatMuda p-4 rounded-lg border-2 border-black">
-              <h4 class="font-bold">Expense</h4>
-              <p class="text-sm">100.000.000</p>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="bg-[#2ecc71] p-4 rounded-lg border-2 border-black">
+                <h4 class="font-bold">Income</h4>
+                <p class="text-sm" id="income">0</p>
+              </div>
+              <div class="bg-coklatMuda p-4 rounded-lg border-2 border-black">
+                <h4 class="font-bold">Expense</h4>
+                <p class="text-sm" id="expense">0</p>
+              </div>
             </div>
           </div>
-          <div class="grid gap-2">
+          <div id="history-section" class="grid gap-2 hidden">
             <h2>History</h2>
             <div class="grid gap-2">
               <div
@@ -50,18 +82,17 @@
                 <h3>Makanan</h3>
                 <p class="text-[#2ecc71]">100.000</p>
               </div>
-              <div
-                class="bg-white rounded-lg border-2 border-black p-3 flex justify-between"
-              >
-                <h3>Minuman</h3>
-                <p class="text-[#2ecc71]">100.000</p>
-              </div>
-              <div
-                class="bg-white rounded-lg border-2 border-black p-3 flex justify-between"
-              >
-                <h3>Minuman</h3>
-                <p class="text-coklatMuda">- 100.000</p>
-              </div>
+              <!-- History items will be appended here -->
+            </div>
+          </div>
+          <div id="make-budget-section" class="grid gap-2 hidden">
+            <div class="bg-primary p-6 rounded-lg border-2 border-black">
+              <h4 class="text-sm">
+                Before getting started with Madang, you are required to set up a
+                budget. This will help you manage your expenses more
+                effectively.
+                <a href="/budget" class="underline">Press this to begin.</a>
+              </h4>
             </div>
           </div>
         </div>
@@ -83,7 +114,6 @@
           <i class="bx bx-file bx-sm"></i>
           <span class="text-xs">Laporan</span>
         </div>
-
         <div
           class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer"
           id="btn-transaksi"
@@ -91,7 +121,6 @@
           <i class="bx bx-money bx-sm"></i>
           <span class="text-xs">Transaksi</span>
         </div>
-
         <div
           class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer"
           id="btn-budget"
@@ -108,6 +137,13 @@
       getAuth,
       onAuthStateChanged,
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      where,
+      getDocs,
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
     // Your web app's Firebase configuration
     const firebaseConfig = {
@@ -122,6 +158,7 @@
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
     // Function to capitalize the first letter of each word
     function capitalizeName(name) {
@@ -129,26 +166,50 @@
     }
 
     // Check for accessToken on page load
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
       const accessToken = localStorage.getItem("accessToken");
+      const loadingSpinner = document.getElementById("loading-spinner");
+
+      // Show loading spinner
+      loadingSpinner.classList.remove("hidden");
 
       if (!accessToken) {
         window.location.href = "/login";
         return;
       }
 
-      onAuthStateChanged(auth, (user) => {
-        console.log(user);
+      onAuthStateChanged(auth, async (user) => {
         if (user) {
-          // User is signed in, get their display name and capitalize it
           const displayName = user.displayName;
           const capitalizedDisplayName = capitalizeName(displayName);
           document.getElementById("greating").textContent =
             capitalizedDisplayName;
+
+          const q = query(
+            collection(db, "budgets"),
+            where("uid", "==", user.uid)
+          );
+          const querySnapshot = await getDocs(q);
+
+          if (!querySnapshot.empty) {
+            document
+              .getElementById("budget-section")
+              .classList.remove("hidden");
+
+            document
+              .getElementById("history-section")
+              .classList.remove("hidden");
+          } else {
+            document
+              .getElementById("make-budget-section")
+              .classList.remove("hidden");
+          }
         } else {
-          // No user is signed in, redirect to login
           window.location.href = "/login";
         }
+
+        // Hide loading spinner
+        loadingSpinner.classList.add("hidden");
       });
     });
 
