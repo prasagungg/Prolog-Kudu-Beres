@@ -10,6 +10,7 @@ tailwind.config = {
         secondary: "#D2A24C",
         coklatMuda: "#CC6B49",
         coklatTua: "#6F5643",
+        softPrimary: "#99beb7",
       },
     },
   },
