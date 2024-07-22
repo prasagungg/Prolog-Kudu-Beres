@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Budget</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/js/tailwind.js"></script>
+  </head>
+  <body class="bg-background">
+    <div
+      class="max-w-md mx-auto min-h-screen h-auto flex flex-col bg-white border-2 border-black rounded-t-lg relative"
+    >
+      <div class="flex-1 p-6">
+        <div class="grid gap-4">
+          <div class="flex gap-2 items-center">
+            <i
+              class="bx bx-arrow-back bx-sm cursor-pointer"
+              onclick="history.back()"
+            ></i>
+            <h3 class="text-xl font-bold">Edit Budget</h3>
+          </div>
+          <form id="edit-form" class="grid gap-4">
+            <div class="grid gap-2">
+              <label class="text-sm">Category</label>
+              <input
+                id="edit-category"
+                type="text"
+                class="w-full text-sm px-3 py-2.5 border-2 border-black rounded-lg"
+                placeholder="Category"
+                required
+              />
+            </div>
+            <div class="grid gap-2">
+              <label class="text-sm">Balance</label>
+              <input
+                id="edit-balance"
+                type="text"
+                class="w-full text-sm px-3 py-2.5 border-2 border-black rounded-lg"
+                placeholder="Balance"
+                required
+              />
+            </div>
+            <input type="hidden" id="edit-id" />
+
+            <div class="flex justify-end">
+              <button
+                type="submit"
+                class="bg-primary text-white p-2 border-2 border-black rounded-lg"
+              >
+                Update
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+      import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+        updateDoc,
+      } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyBECIoLim1XcLVK25kYCxxwGH-_Q7W9rVo",
+        authDomain: "madang-7f36d.firebaseapp.com",
+        projectId: "madang-7f36d",
+        storageBucket: "madang-7f36d.appspot.com",
+        messagingSenderId: "797478379879",
+        appId: "1:797478379879:web:7785922297fa426869cfc2",
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      // Get budget ID from URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const budgetId = urlParams.get("id");
+
+      // Populate form with existing budget data
+      document.addEventListener("DOMContentLoaded", async () => {
+        if (!budgetId) {
+          alert("No budget ID provided.");
+          return;
+        }
+
+        try {
+          const budgetRef = doc(db, "budgets", budgetId);
+          const docSnap = await getDoc(budgetRef);
+
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            document.getElementById("edit-category").value = data.category;
+            document.getElementById("edit-balance").value = data.balance;
+            document.getElementById("edit-id").value = budgetId;
+          } else {
+            alert("No such budget found.");
+          }
+        } catch (e) {
+          console.error("Error fetching budget data: ", e);
+          alert("Error loading budget data.");
+        }
+      });
+
+      document
+        .getElementById("edit-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const id = document.getElementById("edit-id").value;
+          const category = document.getElementById("edit-category").value;
+          const balance = document.getElementById("edit-balance").value;
+
+          if (!id || !category || !balance) {
+            alert("All fields are required.");
+            return;
+          }
+
+          try {
+            const budgetRef = doc(db, "budgets", id);
+            await updateDoc(budgetRef, {
+              category: category,
+              balance: balance,
+            });
+            alert("Budget updated successfully.");
+            window.location.href = "/budget"; // Redirect back to budget list
+          } catch (e) {
+            console.error("Error updating budget: ", e);
+            alert("Error updating budget. Please try again.");
+          }
+        });
+    </script>
+  </body>
+</html>

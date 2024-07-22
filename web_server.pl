@@ -11,8 +11,11 @@ server(Port) :-
 :- http_handler('/js/', serve_js, [prefix]).
 :- http_handler(root(''), home_page, []).
 :- http_handler(root('login'), login_page, []).
+
+:- http_handler(root('budget'), budget_page, []).
 :- http_handler(root('add-budget'), add_budget_page, []).
-:- http_handler(root('budget'), add_budget_page, []).
+:- http_handler(root('edit-budget'), edit_budget_page, []).
+
 :- http_handler(root('report'), report_page, []).
 
 % Home page handler
@@ -27,9 +30,13 @@ login_page(_Request) :-
 budget_page(_Request) :-
     serve_file('src/budget.html').
 
-% budget page handler
+% add budget page handler
 add_budget_page(_Request) :-
     serve_file('src/add_budget.html').
+
+% edit budget page handler
+edit_budget_page(_Request) :-
+    serve_file('src/edit_budget.html').
 
 % Report page handler
 report_page(_Request) :-
@@ -43,6 +50,6 @@ serve_file(FilePath) :-
 
 serve_js(Request) :-
     http_reply_from_files('public/js', [], Request).
-    
+
 % Entry point to start the server
 :- initialization(server(8080)).
