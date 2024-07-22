@@ -20,26 +20,6 @@
     />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/js/tailwind.js"></script>
-    <style>
-      .spinner {
-        border: 4px solid rgba(0, 0, 0, 0.1);
-        border-left-color: #000;
-        border-radius: 50%;
-        width: 36px;
-        height: 36px;
-        animation: spin 1s linear infinite;
-      }
-
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      #loading-overlay {
-        display: none;
-      }
-    </style>
   </head>
   <body class="bg-background">
     <div
@@ -47,7 +27,28 @@
     >
       <div class="flex-1 p-6">
         <div class="grid gap-4">
-          <h3 class="text-xl font-bold">Hello, <span id="greating"></span></h3>
+          <div class="flex justify-between items-center">
+            <h3 class="text-xl font-bold">
+              Hello, <span id="greating"></span>
+            </h3>
+            <div class="relative">
+              <img
+                id="photo-profile"
+                class="cursor-pointer rounded-full w-12 h-12"
+              />
+              <div
+                id="dropdown-menu"
+                class="absolute right-0 mt-2 py-2 w-48 bg-white border rounded shadow-xl hidden"
+              >
+                <button
+                  id="logout-button"
+                  class="block px-4 py-2 text-gray-800 hover:bg-gray-200 w-full text-left"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
           <!-- Loading Spinner -->
           <div
             id="loading-spinner"
@@ -131,11 +132,13 @@
       </div>
     </div>
   </body>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
     import {
       getAuth,
       onAuthStateChanged,
+      signOut,
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
     import {
       getFirestore,
@@ -165,6 +168,27 @@
       return name.replace(/\b\w/g, (char) => char.toUpperCase());
     }
 
+    // Show/hide dropdown menu
+    const photoProfile = document.getElementById("photo-profile");
+    const dropdownMenu = document.getElementById("dropdown-menu");
+
+    photoProfile.addEventListener("click", () => {
+      dropdownMenu.classList.toggle("hidden");
+    });
+
+    // Logout function
+    const logoutButton = document.getElementById("logout-button");
+    logoutButton.addEventListener("click", () => {
+      signOut(auth)
+        .then(() => {
+          localStorage.removeItem("accessToken");
+          window.location.href = "/login";
+        })
+        .catch((error) => {
+          console.error("Error signing out: ", error);
+        });
+    });
+
     // Check for accessToken on page load
     document.addEventListener("DOMContentLoaded", async () => {
       const accessToken = localStorage.getItem("accessToken");
@@ -181,9 +205,16 @@
       onAuthStateChanged(auth, async (user) => {
         if (user) {
           const displayName = user.displayName;
+          const photoURL = user.photoURL;
           const capitalizedDisplayName = capitalizeName(displayName);
           document.getElementById("greating").textContent =
             capitalizedDisplayName;
+
+          if (photoURL) {
+            photoProfile.src = photoURL;
+          } else {
+            photoProfile.src = "path/to/default/image.jpg"; // Replace with your default image path
+          }
 
           const q = query(
             collection(db, "budgets"),
@@ -195,7 +226,6 @@
             document
               .getElementById("budget-section")
               .classList.remove("hidden");
-
             document
               .getElementById("history-section")
               .classList.remove("hidden");
@@ -213,13 +243,13 @@
       });
     });
 
-    //button
+    // Buttons
     const reportButton = document.getElementById("btn-report");
     const homeButton = document.getElementById("btn-home");
     const transaksiButton = document.getElementById("btn-transaksi");
     const budgetButton = document.getElementById("btn-budget");
 
-    // //event click
+    // Event click
     reportButton.addEventListener("click", function () {
       if (window.location.pathname === "/report") return;
       window.location.href = "/report";
