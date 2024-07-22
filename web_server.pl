@@ -12,7 +12,7 @@ server(Port) :-
 :- http_handler(root(''), home_page, []).
 :- http_handler(root('login'), login_page, []).
 :- http_handler(root('add-budget'), add_budget_page, []).
-:- http_handler(root('budget'), add_budget_page, []).
+:- http_handler(root('budget'), budget_page, []).
 :- http_handler(root('report'), report_page, []).
 
 % Home page handler
@@ -43,6 +43,6 @@ serve_file(FilePath) :-
 
 serve_js(Request) :-
     http_reply_from_files('public/js', [], Request).
-    
+
 % Entry point to start the server
 :- initialization(server(8080)).
