@@ -7,6 +7,7 @@
     <title>Madang - Home</title>
     <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -19,6 +20,24 @@
     />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/js/tailwind.js"></script>
+    <style>
+      .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border-left-color: #09f;
+        animation: spin 1s ease infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
   <body class="bg-background">
     <div
@@ -33,63 +52,153 @@
             ></i>
             <h3 class="text-xl font-bold">Create Budget</h3>
           </div>
-          <div class="grid gap-2">
-            <label class="text-sm">Category</label>
-            <input
-              type="input"
-              class="w-full h-full text-sm px-3 py-2.5 border-2 border-black rounded-lg focus:outline-none"
-              placeholder="Name Category"
-            />
-          </div>
-          <div class="grid gap-2">
-            <label class="text-sm">Balance</label>
-            <input
-              type="input"
-              class="w-full h-full text-sm px-3 py-2.5 border-2 border-black rounded-lg focus:outline-none"
-              placeholder="Amount Balance"
-            />
-          </div>
-          <div class="flex justify-end">
-            <button
-              class="bg-primary text-white p-1 border-2 border-black rounded-lg"
-            >
-              Submit
-            </button>
-          </div>
+          <form id="budget-form" class="grid gap-4">
+            <div class="grid gap-2">
+              <label class="text-sm">Category</label>
+              <input
+                type="input"
+                id="category"
+                class="w-full h-full text-sm px-3 py-2.5 border-2 border-black rounded-lg focus:outline-none"
+                placeholder="Name Category"
+                required
+              />
+            </div>
+            <div class="grid gap-2">
+              <label class="text-sm">Balance</label>
+              <input
+                type="number"
+                id="balance"
+                class="w-full h-full text-sm px-3 py-2.5 border-2 border-black rounded-lg focus:outline-none"
+                placeholder="Amount Balance"
+                required
+              />
+            </div>
+            <div class="flex justify-end">
+              <button
+                type="submit"
+                class="bg-primary text-white p-1 border-2 border-black rounded-lg"
+              >
+                Submit
+              </button>
+            </div>
+          </form>
         </div>
       </div>
+      <!-- Loading spinner -->
+      <div
+        id="loading-spinner"
+        class="flex items-center justify-center absolute inset-0 bg-white bg-opacity-75 hidden"
+      >
+        <div class="spinner"></div>
+      </div>
     </div>
-  </body>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged,
-    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+      import {
+        getFirestore,
+        collection,
+        query,
+        where,
+        getDocs,
+        addDoc,
+      } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
-    // Your web app's Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyBECIoLim1XcLVK25kYCxxwGH-_Q7W9rVo",
-      authDomain: "madang-7f36d.firebaseapp.com",
-      projectId: "madang-7f36d",
-      storageBucket: "madang-7f36d.appspot.com",
-      messagingSenderId: "797478379879",
-      appId: "1:797478379879:web:7785922297fa426869cfc2",
-    };
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyBECIoLim1XcLVK25kYCxxwGH-_Q7W9rVo",
+        authDomain: "madang-7f36d.firebaseapp.com",
+        projectId: "madang-7f36d",
+        storageBucket: "madang-7f36d.appspot.com",
+        messagingSenderId: "797478379879",
+        appId: "1:797478379879:web:7785922297fa426869cfc2",
+      };
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
 
-    // Check for accessToken on page load
-    document.addEventListener("DOMContentLoaded", () => {
-      const accessToken = localStorage.getItem("accessToken");
+      let currentUser = null;
 
-      if (!accessToken) {
-        window.location.href = "/login";
-        return;
+      // Check for accessToken on page load and set currentUser
+      document.addEventListener("DOMContentLoaded", () => {
+        const accessToken = localStorage.getItem("accessToken");
+
+        if (!accessToken) {
+          window.location.href = "/login";
+          return;
+        }
+
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            currentUser = user;
+          } else {
+            window.location.href = "/login";
+          }
+        });
+      });
+
+      // Handle form submission
+      async function handleSubmit(event) {
+        event.preventDefault();
+
+        if (!currentUser) {
+          alert("User not authenticated");
+          return;
+        }
+
+        const category = document.getElementById("category").value;
+        const balance = document.getElementById("balance").value;
+
+        if (!category || !balance) {
+          alert("Both category and balance are required");
+          return;
+        }
+
+        const loadingSpinner = document.getElementById("loading-spinner");
+        loadingSpinner.classList.remove("hidden");
+
+        try {
+          // Check if category already exists for the current user
+          const q = query(
+            collection(db, "budgets"),
+            where("uid", "==", currentUser.uid),
+            where("category", "==", category)
+          );
+          const querySnapshot = await getDocs(q);
+
+          if (!querySnapshot.empty) {
+            alert(
+              "Category already exists. Please choose a different category."
+            );
+            loadingSpinner.classList.add("hidden");
+            return;
+          }
+
+          // Add new budget
+          const docRef = await addDoc(collection(db, "budgets"), {
+            uid: currentUser.uid,
+            category,
+            balance: parseFloat(balance),
+          });
+          alert("Budget added successfully.");
+          window.location.href = "/budget";
+        } catch (e) {
+          console.error("Error adding document: ", e);
+          alert("Error creating budget. Please try again.");
+        } finally {
+          loadingSpinner.classList.add("hidden");
+        }
       }
-    });
-  </script>
+
+      document
+        .getElementById("budget-form")
+        .addEventListener("submit", handleSubmit);
+    </script>
+  </body>
 </html>

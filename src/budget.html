@@ -4,9 +4,10 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Madang - Home</title>
+    <title>Madang - budget</title>
     <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -32,73 +33,17 @@
               <i class="bx bx-plus-circle bx-sm"></i>
             </button>
           </div>
-          <div class="grid gap-3">
+          <div id="budget-list" class="grid gap-3">
+            <!-- Budget items will be inserted here -->
+          </div>
+          <!-- Loading Spinner -->
+          <div
+            id="loading-spinner"
+            class="flex justify-center items-center hidden"
+          >
             <div
-              class="bg-primary rounded-lg border-2 border-black p-3 flex justify-between items-center"
-            >
-              <div>
-                <h3 class="font-bold">Makanan</h3>
-                <p class="text-sm">100.000</p>
-              </div>
-              <button>
-                <i class="bx bx-pencil bx-sm text-red"></i>
-              </button>
-            </div>
-            <div
-              class="bg-primary rounded-lg border-2 border-black p-3 flex justify-between items-center"
-            >
-              <div>
-                <h3 class="font-bold">Makanan</h3>
-                <p class="text-sm">100.000</p>
-              </div>
-              <button>
-                <i class="bx bx-pencil bx-sm text-red"></i>
-              </button>
-            </div>
-            <div
-              class="bg-primary rounded-lg border-2 border-black p-3 flex justify-between items-center"
-            >
-              <div>
-                <h3 class="font-bold">Makanan</h3>
-                <p class="text-sm">100.000</p>
-              </div>
-              <button>
-                <i class="bx bx-pencil bx-sm text-red"></i>
-              </button>
-            </div>
-            <div
-              class="bg-primary rounded-lg border-2 border-black p-3 flex justify-between items-center"
-            >
-              <div>
-                <h3 class="font-bold">Makanan</h3>
-                <p class="text-sm">100.000</p>
-              </div>
-              <button>
-                <i class="bx bx-pencil bx-sm text-red"></i>
-              </button>
-            </div>
-            <div
-              class="bg-primary rounded-lg border-2 border-black p-3 flex justify-between items-center"
-            >
-              <div>
-                <h3 class="font-bold">Makanan</h3>
-                <p class="text-sm">100.000</p>
-              </div>
-              <button>
-                <i class="bx bx-pencil bx-sm text-red"></i>
-              </button>
-            </div>
-            <div
-              class="bg-primary rounded-lg border-2 border-black p-3 flex justify-between items-center"
-            >
-              <div>
-                <h3 class="font-bold">Makanan</h3>
-                <p class="text-sm">100.000</p>
-              </div>
-              <button>
-                <i class="bx bx-pencil bx-sm text-red"></i>
-              </button>
-            </div>
+              class="w-12 h-12 border-t-4 border-primary border-solid rounded-full animate-spin"
+            ></div>
           </div>
         </div>
       </div>
@@ -119,7 +64,6 @@
           <i class="bx bx-file bx-sm"></i>
           <span class="text-xs">Laporan</span>
         </div>
-
         <div
           class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer"
           id="btn-transaksi"
@@ -127,7 +71,6 @@
           <i class="bx bx-money bx-sm"></i>
           <span class="text-xs">Transaksi</span>
         </div>
-
         <div
           class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer"
           id="btn-budget"
@@ -137,62 +80,142 @@
         </div>
       </div>
     </div>
-  </body>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged,
-    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+      import {
+        getFirestore,
+        collection,
+        query,
+        where,
+        getDocs,
+      } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
-    // Your web app's Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyBECIoLim1XcLVK25kYCxxwGH-_Q7W9rVo",
-      authDomain: "madang-7f36d.firebaseapp.com",
-      projectId: "madang-7f36d",
-      storageBucket: "madang-7f36d.appspot.com",
-      messagingSenderId: "797478379879",
-      appId: "1:797478379879:web:7785922297fa426869cfc2",
-    };
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyBECIoLim1XcLVK25kYCxxwGH-_Q7W9rVo",
+        authDomain: "madang-7f36d.firebaseapp.com",
+        projectId: "madang-7f36d",
+        storageBucket: "madang-7f36d.appspot.com",
+        messagingSenderId: "797478379879",
+        appId: "1:797478379879:web:7785922297fa426869cfc2",
+      };
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
 
-    // Check for accessToken on page load
-    document.addEventListener("DOMContentLoaded", () => {
-      const accessToken = localStorage.getItem("accessToken");
+      let currentUser = null;
 
-      if (!accessToken) {
-        window.location.href = "/login";
-        return;
+      // Check for accessToken on page load and set currentUser
+      document.addEventListener("DOMContentLoaded", async () => {
+        const accessToken = localStorage.getItem("accessToken");
+
+        if (!accessToken) {
+          window.location.href = "/login";
+          return;
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+          if (user) {
+            currentUser = user;
+            await loadBudgets();
+          } else {
+            window.location.href = "/login";
+          }
+        });
+      });
+
+      async function loadBudgets() {
+        if (!currentUser) {
+          alert("User not authenticated");
+          return;
+        }
+
+        const budgetList = document.getElementById("budget-list");
+        const loadingSpinner = document.getElementById("loading-spinner");
+
+        // Show loading spinner
+        loadingSpinner.classList.remove("hidden");
+
+        try {
+          const q = query(
+            collection(db, "budgets"),
+            where("uid", "==", currentUser.uid)
+          );
+          const querySnapshot = await getDocs(q);
+
+          // Clear the list before adding new items
+          budgetList.innerHTML = "";
+
+          // Create a number formatter for the desired format
+          const numberFormatter = new Intl.NumberFormat("id-ID");
+
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const formattedBalance = numberFormatter.format(data.balance);
+
+            const budgetItem = document.createElement("div");
+            budgetItem.classList.add(
+              "bg-primary",
+              "rounded-lg",
+              "border-2",
+              "border-black",
+              "p-3",
+              "flex",
+              "justify-between",
+              "items-center"
+            );
+            budgetItem.innerHTML = `
+        <div>
+          <h3 class="font-bold">${data.category}</h3>
+          <p class="text-sm">${formattedBalance}</p>
+        </div>
+        <button onclick="window.location.href = '/edit-budget?id=${doc.id}'">
+          <i class="bx bx-pencil bx-sm text-red"></i>
+        </button>
+      `;
+            budgetList.appendChild(budgetItem);
+          });
+        } catch (e) {
+          console.error("Error loading budgets: ", e);
+          alert("Error loading budgets. Please try again.");
+        } finally {
+          // Hide loading spinner
+          loadingSpinner.classList.add("hidden");
+        }
       }
-    });
 
-    //button
-    const reportButton = document.getElementById("btn-report");
-    const homeButton = document.getElementById("btn-home");
-    const transaksiButton = document.getElementById("btn-transaksi");
-    const budgetButton = document.getElementById("btn-budget");
+      // Navigation buttons
+      const reportButton = document.getElementById("btn-report");
+      const homeButton = document.getElementById("btn-home");
+      const transaksiButton = document.getElementById("btn-transaksi");
+      const budgetButton = document.getElementById("btn-budget");
 
-    // //event click
-    reportButton.addEventListener("click", function () {
-      if (window.location.pathname === "/report") return;
-      window.location.href = "/report";
-    });
+      // Event click
+      reportButton.addEventListener("click", function () {
+        if (window.location.pathname === "/report") return;
+        window.location.href = "/report";
+      });
 
-    homeButton.addEventListener("click", function () {
-      if (window.location.pathname === "/") return;
-      window.location.href = "/";
-    });
+      homeButton.addEventListener("click", function () {
+        if (window.location.pathname === "/") return;
+        window.location.href = "/";
+      });
 
-    transaksiButton.addEventListener("click", function () {
-      if (window.location.pathname === "/transaksi") return;
-      window.location.href = "/transaksi";
-    });
+      transaksiButton.addEventListener("click", function () {
+        if (window.location.pathname === "/transaksi") return;
+        window.location.href = "/transaksi";
+      });
 
-    budgetButton.addEventListener("click", function () {
-      if (window.location.pathname === "/budget") return;
-      window.location.href = "/budget";
-    });
-  </script>
+      budgetButton.addEventListener("click", function () {
+        if (window.location.pathname === "/budget") return;
+        window.location.href = "/budget";
+      });
+    </script>
+  </body>
 </html>
