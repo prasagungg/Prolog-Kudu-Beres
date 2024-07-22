@@ -27,28 +27,6 @@
     >
       <div class="flex-1 p-6">
         <div class="grid gap-4">
-          <div class="flex justify-between items-center">
-            <h3 class="text-xl font-bold">
-              Hello, <span id="greating"></span>
-            </h3>
-            <div class="relative">
-              <img
-                id="photo-profile"
-                class="cursor-pointer rounded-full w-12 h-12"
-              />
-              <div
-                id="dropdown-menu"
-                class="absolute right-0 mt-2 py-2 w-48 bg-white border rounded shadow-xl hidden"
-              >
-                <button
-                  id="logout-button"
-                  class="block px-4 py-2 text-gray-800 hover:bg-gray-200 w-full text-left"
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
-          </div>
           <!-- Loading Spinner -->
           <div
             id="loading-spinner"
@@ -57,44 +35,6 @@
             <div
               class="w-12 h-12 border-t-4 border-primary border-solid rounded-full animate-spin"
             ></div>
-          </div>
-          <div id="budget-section" class="grid gap-2 hidden">
-            <div class="bg-primary p-6 rounded-lg border-2 border-black">
-              <h4 class="font-bold">Your Balance</h4>
-              <p id="balance">0</p>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div class="bg-[#2ecc71] p-4 rounded-lg border-2 border-black">
-                <h4 class="font-bold">Income</h4>
-                <p class="text-sm" id="income">0</p>
-              </div>
-              <div class="bg-coklatMuda p-4 rounded-lg border-2 border-black">
-                <h4 class="font-bold">Expense</h4>
-                <p class="text-sm" id="expense">0</p>
-              </div>
-            </div>
-          </div>
-          <div id="history-section" class="grid gap-2 hidden">
-            <h2>History</h2>
-            <div class="grid gap-2">
-              <div
-                class="bg-white rounded-lg border-2 border-black p-3 flex justify-between"
-              >
-                <h3>Makanan</h3>
-                <p class="text-[#2ecc71]">100.000</p>
-              </div>
-              <!-- History items will be appended here -->
-            </div>
-          </div>
-          <div id="make-budget-section" class="grid gap-2 hidden">
-            <div class="bg-primary p-6 rounded-lg border-2 border-black">
-              <h4 class="text-sm">
-                Before getting started with Madang, you are required to set up a
-                budget. This will help you manage your expenses more
-                effectively.
-                <a href="/budget" class="underline">Press this to begin.</a>
-              </h4>
-            </div>
           </div>
         </div>
       </div>
@@ -163,32 +103,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Function to capitalize the first letter of each word
-    function capitalizeName(name) {
-      return name.replace(/\b\w/g, (char) => char.toUpperCase());
-    }
-
-    // Show/hide dropdown menu
-    const photoProfile = document.getElementById("photo-profile");
-    const dropdownMenu = document.getElementById("dropdown-menu");
-
-    photoProfile.addEventListener("click", () => {
-      dropdownMenu.classList.toggle("hidden");
-    });
-
-    // Logout function
-    const logoutButton = document.getElementById("logout-button");
-    logoutButton.addEventListener("click", () => {
-      signOut(auth)
-        .then(() => {
-          localStorage.removeItem("accessToken");
-          window.location.href = "/login";
-        })
-        .catch((error) => {
-          console.error("Error signing out: ", error);
-        });
-    });
-
     // Check for accessToken on page load
     document.addEventListener("DOMContentLoaded", async () => {
       const accessToken = localStorage.getItem("accessToken");
@@ -201,46 +115,6 @@
         window.location.href = "/login";
         return;
       }
-
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          const displayName = user.displayName;
-          const photoURL = user.photoURL;
-          const capitalizedDisplayName = capitalizeName(displayName);
-          document.getElementById("greating").textContent =
-            capitalizedDisplayName;
-
-          if (photoURL) {
-            photoProfile.src = photoURL;
-          } else {
-            photoProfile.src = "path/to/default/image.jpg"; // Replace with your default image path
-          }
-
-          const q = query(
-            collection(db, "budgets"),
-            where("uid", "==", user.uid)
-          );
-          const querySnapshot = await getDocs(q);
-
-          if (!querySnapshot.empty) {
-            document
-              .getElementById("budget-section")
-              .classList.remove("hidden");
-            document
-              .getElementById("history-section")
-              .classList.remove("hidden");
-          } else {
-            document
-              .getElementById("make-budget-section")
-              .classList.remove("hidden");
-          }
-        } else {
-          window.location.href = "/login";
-        }
-
-        // Hide loading spinner
-        loadingSpinner.classList.add("hidden");
-      });
     });
 
     // Buttons

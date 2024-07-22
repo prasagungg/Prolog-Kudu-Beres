@@ -17,6 +17,7 @@ server(Port) :-
 :- http_handler(root('edit-budget'), edit_budget_page, []).
 
 :- http_handler(root('report'), report_page, []).
+:- http_handler(root('transaction'), report_page, []).
 
 % Home page handler
 home_page(_Request) :-
@@ -41,6 +42,10 @@ edit_budget_page(_Request) :-
 % Report page handler
 report_page(_Request) :-
     serve_file('src/report.html').
+
+% Report page handler
+transaction_page(_Request) :-
+    serve_file('src/transaction.html').
 
 % Helper predicate to serve HTML files
 serve_file(FilePath) :-
