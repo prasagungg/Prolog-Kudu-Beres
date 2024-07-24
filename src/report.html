@@ -1,229 +1,292 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Madang - Home</title>
     <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/js/tailwind.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  </head>
-  <body class="bg-background">
+</head>
+<body class="bg-background">
     <div class="max-w-md mx-auto min-h-screen h-auto flex flex-col bg-white border-2 border-black rounded-t-lg relative">
-      <div class="flex-1 p-6">
-        <div class="grid gap-4">
-          <div class="flex justify-between items-center">
-            <h3 class="text-xl font-bold">Report Your Money</h3>
-            <i class="bx bx-wink-smile bx-sm"></i>
-          </div>
-          <form class="bg-white p-6 rounded-lg shadow-md border-2 border-black">
-            <div class="mb-4">
-                <label for="start_date" class="block text-gray-700 text-sm font-bold mb-2">Start Date:</label>
-                <input type="date" id="start_date" name="start_date" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-            </div>
-            <div class="mb-4">
-                <label for="end_date" class="block text-gray-700 text-sm font-bold mb-2">End Date:</label>
-                <input type="date" id="end_date" name="end_date" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-            </div>
-            <div class="flex items-center justify-between">
-                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                    Filter
-                </button>
-            </div>
-          </form>
-          <div class="bg-primary p-6 rounded-lg border-2 border-black">
-            <div class="flex justify-between mb-2">
-              <div class="flex">
-                <h5 class="ml-4 font-bold">Pemasukan</h5>
-              </div>
-              <h4 class="font-bold">50000</h4>
-            </div>
-            <div class="flex justify-between mb-2">
-              <div class="flex">
-                <h5 class="ml-4 font-bold">Pengeluaran</h5>
-              </div>
-              <h4 class="font-bold">30000</h4>
-            </div>
-            <hr />
-            <div class="flex justify-between mt-2">
-              <div class="flex">
-                <h5 class="ml-4 font-bold">Sisa Uang</h5>
-              </div>
-              <h4 class="font-bold">20000</h4>
-            </div>
-          </div>
-          <div class="grid gap-2">
-            <h2>Detail Pengeluaran</h2>
-            <div class="grid gap-2">
-              <div class="bg-softPrimary p-6 rounded-lg border-2 border-black">
-                <div class="flex justify-between">
-                  <h4 class="font-bold">23 June 2024</h4>
-                  <h4 class="font-bold">30000</h4>
+        <div class="flex-1 p-6">
+            <div class="grid gap-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold">Report Your Money</h3>
+                    <i class="bx bx-wink-smile bx-sm"></i>
                 </div>
-                <hr class="mb-4" />
-                <div class="flex justify-between mb-4">
-                  <div class="flex">
-                    <h5 class="ml-4 font-bold">Fitnes</h5>
+                <form class="bg-white p-6 rounded-lg shadow-md border-2 border-black">
+                    <div class="mb-4">
+                        <label for="start_date" class="block text-gray-700 text-sm font-bold mb-2">Start Date:</label>
+                        <input type="date" id="start_date" name="start_date" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label for="end_date" class="block text-gray-700 text-sm font-bold mb-2">End Date:</label>
+                        <input type="date" id="end_date" name="end_date" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            Filter
+                        </button>
+                    </div>
+                </form>
+                <div class="bg-primary p-6 rounded-lg border-2 border-black">
+                  <div class="flex justify-between mb-2">
+                    <div class="flex">
+                      <h5 class="ml-4 font-bold">Income</h5>
+                    </div>
+                    <h4 class="font-bold" id="total-pemasukan">50000</h4>
                   </div>
-                  <h4 class="font-bold">10000</h4>
-                </div>
-                <div class="flex justify-between mb-4">
-                  <div class="flex">
-                    <h5 class="ml-4 font-bold">Food & Beverage</h5>
+                  <div class="flex justify-between mb-2">
+                    <div class="flex">
+                      <h5 class="ml-4 font-bold">Expense</h5>
+                    </div>
+                    <h4 class="font-bold" id="total-pengeluaran">30000</h4>
                   </div>
-                  <h4 class="font-bold">20000</h4>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="grid gap-2">
-            <h2>Detail Pemasukan</h2>
-            <div class="grid gap-2">
-              <div class="bg-softPrimary p-6 rounded-lg border-2 border-black">
-                <div class="flex justify-between">
-                  <h4 class="font-bold">23 June 2024</h4>
-                  <h4 class="font-bold">50000</h4>
-                </div>
-                <hr class="mb-4" />
-                <div class="flex justify-between mb-4">
-                  <div class="flex">
-                    <h5 class="ml-4 font-bold">Bonus</h5>
+                  <hr />
+                  <div class="flex justify-between mt-2">
+                    <div class="flex">
+                      <h5 class="ml-4 font-bold">The rest of the Money</h5>
+                    </div>
+                    <h4 class="font-bold" id="sisa-uang">20000</h4>
                   </div>
-                  <h4 class="font-bold">50000</h4>
                 </div>
-              </div>
+                <div id="pemasukan-details" class="grid gap-2">
+                    <h2 class="font-bold">Income Details</h2>
+                </div>
+                <div id="pengeluaran-details" class="grid gap-2">
+                    <h2 class="font-bold">Expense Details</h2>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-      <div
-        class="w-full bg-secondary footer sticky bottom-0 z-50 grid gap-2 grid-cols-4 p-4 border-t-2 border-black rounded-t-xl"
-      >
-        <div
-          class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer"
-          id="btn-home"
-        >
-          <i class="bx bx-home bx-sm"></i>
-          <span class="text-xs">Home</span>
+        <div class="w-full bg-secondary footer sticky bottom-0 z-50 grid gap-2 grid-cols-4 p-4 border-t-2 border-black rounded-t-xl">
+            <div class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer" id="btn-home">
+                <i class="bx bx-home bx-sm"></i>
+                <span class="text-xs">Home</span>
+            </div>
+            <div class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer" id="btn-report">
+                <i class="bx bx-file bx-sm"></i>
+                <span class="text-xs">Laporan</span>
+            </div>
+            <div class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer" id="btn-transaksi">
+                <i class="bx bx-money bx-sm"></i>
+                <span class="text-xs">Transaksi</span>
+            </div>
+            <div class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer" id="btn-budget">
+                <i class="bx bx-wallet bx-sm"></i>
+                <span class="text-xs">Budget</span>
+            </div>
         </div>
-        <div
-          class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer"
-          id="btn-report"
-        >
-          <i class="bx bx-file bx-sm"></i>
-          <span class="text-xs">Laporan</span>
-        </div>
-
-        <div
-          class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer"
-          id="btn-transaksi"
-        >
-          <i class="bx bx-money bx-sm"></i>
-          <span class="text-xs">Transaksi</span>
-        </div>
-
-        <div
-          class="border-black border-2 rounded-lg flex justify-center items-center flex-col cursor-pointer"
-          id="btn-budget"
-        >
-          <i class="bx bx-wallet bx-sm"></i>
-          <span class="text-xs">Budget</span>
-        </div>
-      </div>
     </div>
-  </body>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged,
-    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
-    // Your web app's Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyBECIoLim1XcLVK25kYCxxwGH-_Q7W9rVo",
-      authDomain: "madang-7f36d.firebaseapp.com",
-      projectId: "madang-7f36d",
-      storageBucket: "madang-7f36d.appspot.com",
-      messagingSenderId: "797478379879",
-      appId: "1:797478379879:web:7785922297fa426869cfc2",
-    };
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBECIoLim1XcLVK25kYCxxwGH-_Q7W9rVo",
+            authDomain: "madang-7f36d.firebaseapp.com",
+            projectId: "madang-7f36d",
+            storageBucket: "madang-7f36d.appspot.com",
+            messagingSenderId: "797478379879",
+            appId: "1:797478379879:web:7785922297fa426869cfc2",
+        };
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-    // Function to capitalize the first letter of each word
-    function capitalizeName(name) {
-      return name.replace(/\b\w/g, (char) => char.toUpperCase());
-    }
+        let currentUser = null;
 
-    // Check for accessToken on page load
-    document.addEventListener("DOMContentLoaded", () => {
-      const accessToken = localStorage.getItem("accessToken");
+        // Check for accessToken on page load and set currentUser
+        document.addEventListener("DOMContentLoaded", async () => {
+            const accessToken = localStorage.getItem("accessToken");
 
-      if (!accessToken) {
-        window.location.href = "/login";
-        return;
+            if (!accessToken) {
+                window.location.href = "/login";
+                return;
+            }
+
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUser = user;
+                    await loadReports();
+                } else {
+                    window.location.href = "/login";
+                }
+            });
+        });
+        function formatDate(date) {
+            // Array of day names in English
+            const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            // Array of month names in English
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+            const day = dayNames[date.getDay()];
+            const dateNumber = date.getDate();
+            const month = monthNames[date.getMonth()];
+            const year = date.getFullYear();
+
+            return `${day}, ${dateNumber} ${month} ${year}`;
+        }
+
+        async function loadReports() {
+            try {
+                const transactions = query(
+                    collection(db, "transactions"),
+                    where("uid", "==", auth.currentUser.uid)
+                );
+                const budgets = query(
+                    collection(db, "budgets"),
+                    where("uid", "==", auth.currentUser.uid)
+                );
+
+                const [queryTransactions, queryBudgets] = await Promise.all([
+                    getDocs(transactions),
+                    getDocs(budgets),
+                ]);
+
+                // Initialize data containers
+                let pemasukan = {};
+                let pengeluaran = {};
+                let totalPemasukan = 0;
+                let totalPengeluaran = 0;
+
+                // Process each transaction
+                queryTransactions.forEach((doc) => {
+                    const data = doc.data();
+                    const { category, created_at, balance, type, name } = data;
+                    const date = formatDate(created_at.toDate()); // Use formatDate
+
+                    if (type === "pemasukan") {
+                        if (!pemasukan[date]) {
+                            pemasukan[date] = [];
+                        }
+                        pemasukan[date].push({ name, balance });
+                        totalPemasukan += balance;
+                    } else if (type === "pengeluaran") {
+                        if (!pengeluaran[date]) {
+                            pengeluaran[date] = {};
+                        }
+                        if (!pengeluaran[date][category]) {
+                            pengeluaran[date][category] = 0;
+                        }
+                        pengeluaran[date][category] += balance;
+                        totalPengeluaran += balance;
+                    }
+                });
+
+                // Calculate total balance
+                const sisaUang = totalPemasukan - totalPengeluaran;
+
+                updateReportSection(pemasukan, "pemasukan");
+                updateReportSection(pengeluaran, "pengeluaran");
+
+                document.getElementById("total-pemasukan").innerText = totalPemasukan.toLocaleString();
+                document.getElementById("total-pengeluaran").innerText = totalPengeluaran.toLocaleString();
+                document.getElementById("sisa-uang").innerText = sisaUang.toLocaleString();
+            } catch (error) {
+                console.error("Error fetching data: ", error);
+            }
+        }
+
+      function updateReportSection(data, type) {
+          const containerId = type === "pemasukan" ? "pemasukan-details" : "pengeluaran-details";
+          const container = document.getElementById(containerId);
+
+          container.innerHTML = '';
+
+          if (type === "pemasukan") {
+              container.innerHTML = `<h2 class="font-bold mb-2">Income Details</h2>`;
+
+              for (const [date, items] of Object.entries(data)) {
+                  const totalForDate = items.reduce((sum, item) => sum + item.balance, 0);
+
+                  let sectionHTML = `
+                      <div class="bg-softPrimary p-6 rounded-lg border-2 border-black mb-4">
+                          <div class="flex justify-between mb-2">
+                              <h4 class="font-bold">${date}</h4>
+                              <h4 class="font-bold">${totalForDate.toLocaleString()}</h4>
+                          </div>
+                          <hr class="mb-4" />`;
+
+                  items.forEach(({ name, balance }) => {
+                      sectionHTML += `
+                          <div class="flex justify-between mb-4">
+                              <h5 class="ml-4 font-bold">${name}</h5>
+                              <h4 class="font-bold">${balance.toLocaleString()}</h4>
+                          </div>`;
+                  });
+
+                  sectionHTML += `</div>`;
+                  container.innerHTML += sectionHTML;
+              }
+          } else {
+              // Add title
+              container.innerHTML = `<h2 class="font-bold mb-2">Expense Details</h2>`;
+
+              for (const [date, categories] of Object.entries(data)) {
+                  const total = Object.values(categories).reduce((a, b) => a + b, 0);
+                  let sectionHTML = `
+                      <div class="grid gap-2">
+                          <div class="bg-softPrimary p-6 rounded-lg border-2 border-black mb-4">
+                              <div class="flex justify-between mb-2">
+                                  <h4 class="font-bold">${date}</h4>
+                                  <h4 class="font-bold">${total.toLocaleString()}</h4>
+                              </div>
+                              <hr class="mb-4" />`;
+
+                  for (const [category, amount] of Object.entries(categories)) {
+                      sectionHTML += `
+                          <div class="flex justify-between mb-4">
+                              <h5 class="ml-4 font-bold">${category}</h5>
+                              <h4 class="font-bold">${amount.toLocaleString()}</h4>
+                          </div>`;
+                  }
+
+                  sectionHTML += `</div></div>`;
+                  container.innerHTML += sectionHTML;
+              }
+          }
       }
 
-      onAuthStateChanged(auth, (user) => {
-        console.log(user);
-        if (user) {
-          // User is signed in, get their display name and capitalize it
-          const displayName = user.displayName;
-          const capitalizedDisplayName = capitalizeName(displayName);
-          document.getElementById("greating").textContent =
-            capitalizedDisplayName;
-        } else {
-          // No user is signed in, redirect to login
-          window.location.href = "/login";
-        }
+      // Navigation buttons
+      const reportButton = document.getElementById("btn-report");
+      const homeButton = document.getElementById("btn-home");
+      const transaksiButton = document.getElementById("btn-transaksi");
+      const budgetButton = document.getElementById("btn-budget");
+
+      // Event click
+      reportButton.addEventListener("click", function () {
+        if (window.location.pathname === "/report") return;
+        window.location.href = "/report";
       });
-    });
 
-    //button
-    const reportButton = document.getElementById("btn-report");
-    const homeButton = document.getElementById("btn-home");
-    const transaksiButton = document.getElementById("btn-transaksi");
-    const budgetButton = document.getElementById("btn-budget");
+      homeButton.addEventListener("click", function () {
+        if (window.location.pathname === "/") return;
+        window.location.href = "/";
+      });
 
-    // //event click
-    reportButton.addEventListener("click", function () {
-      if (window.location.pathname === "/report") return;
-      window.location.href = "/report";
-    });
+      transaksiButton.addEventListener("click", function () {
+        if (window.location.pathname === "/transaction") return;
+        window.location.href = "/transaction";
+      });
 
-    homeButton.addEventListener("click", function () {
-      if (window.location.pathname === "/") return;
-      window.location.href = "/";
-    });
-
-    transaksiButton.addEventListener("click", function () {
-      if (window.location.pathname === "/transaction") return;
-      window.location.href = "/transaction";
-    });
-
-    budgetButton.addEventListener("click", function () {
-      if (window.location.pathname === "/budget") return;
-      window.location.href = "/budget";
-    });
-
-    const ctx = document.getElementById('myChart');
-
-  </script>
+      budgetButton.addEventListener("click", function () {
+        if (window.location.pathname === "/budget") return;
+        window.location.href = "/budget";
+      });
+    </script>
+</body>
 </html>
