@@ -76,15 +76,7 @@
           </div>
           <div id="history-section" class="grid gap-2 hidden">
             <h2>History</h2>
-            <div class="grid gap-2">
-              <div
-                class="bg-white rounded-lg border-2 border-black p-3 flex justify-between"
-              >
-                <h3>Makanan</h3>
-                <p class="text-[#2ecc71]">100.000</p>
-              </div>
-              <!-- History items will be appended here -->
-            </div>
+            <div id="history-list" class="grid gap-2"></div>
           </div>
           <div id="make-budget-section" class="grid gap-2 hidden">
             <div class="bg-primary p-6 rounded-lg border-2 border-black">
@@ -168,6 +160,10 @@
       return name.replace(/\b\w/g, (char) => char.toUpperCase());
     }
 
+    function formatNumber(number) {
+      return number.toLocaleString("id-ID");
+    }
+
     // Show/hide dropdown menu
     const photoProfile = document.getElementById("photo-profile");
     const dropdownMenu = document.getElementById("dropdown-menu");
@@ -234,6 +230,8 @@
               .getElementById("make-budget-section")
               .classList.remove("hidden");
           }
+
+          await loadBudget();
         } else {
           window.location.href = "/login";
         }
@@ -242,6 +240,64 @@
         loadingSpinner.classList.add("hidden");
       });
     });
+
+    async function loadBudget() {
+      const budgetSection = document.getElementById("budget-section");
+      const historySection = document.getElementById("history-section");
+      const makeBudgetSection = document.getElementById("make-budget-section");
+
+      const q = query(
+        collection(db, "transactions"),
+        where("uid", "==", auth.currentUser.uid)
+      );
+      const querySnapshot = await getDocs(q);
+
+      let totalIncome = 0;
+      let totalExpenses = 0;
+      let historyHTML = "";
+
+      let index = 0;
+      for (const doc of querySnapshot.docs) {
+        const data = doc.data();
+
+        if (data.type === "pemasukan") {
+          totalIncome += data.balance;
+        } else if (data.type === "pengeluaran") {
+          totalExpenses += data.balance;
+        }
+
+        // Only include the first 5 transactions
+        if (index < 5) {
+          const formattedAmount = formatNumber(data.balance);
+          historyHTML += `
+          <div class="bg-white rounded-lg border-2 border-black p-3 flex justify-between">
+            <h3>${data.name}</h3>
+            <p class="${
+              data.type === "pemasukan" ? "text-[#2ecc71]" : "text-coklatMuda"
+            }">${data.type === "pemasukan" ? "+" : "-"} ${formattedAmount}</p>
+          </div>
+        `;
+          index++;
+        } else {
+          break; // Exit loop if 5 transactions are processed
+        }
+      }
+
+      const balance = totalIncome - totalExpenses;
+      document.getElementById("balance").textContent = `${formatNumber(
+        balance
+      )}`;
+      document.getElementById("income").textContent = `${formatNumber(
+        totalIncome
+      )}`;
+      document.getElementById("expense").textContent = `${formatNumber(
+        totalExpenses
+      )}`;
+
+      const historyContainer = document.getElementById("history-list");
+
+      historyContainer.innerHTML = historyHTML;
+    }
 
     // Buttons
     const reportButton = document.getElementById("btn-report");
