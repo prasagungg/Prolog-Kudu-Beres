@@ -5,9 +5,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Madang - Home</title>
-    <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -20,24 +17,6 @@
     />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/js/tailwind.js"></script>
-    <style>
-      .spinner {
-        border: 4px solid rgba(0, 0, 0, 0.1);
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        border-left-color: #09f;
-        animation: spin 1s ease infinite;
-      }
-      @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-    </style>
   </head>
   <body class="bg-background">
     <div
@@ -52,72 +31,90 @@
             ></i>
             <h3 class="text-xl font-bold">Create Transaction</h3>
           </div>
-          <form id="budget-form" class="grid gap-4">
+          <form id="transaction-form" class="grid gap-4">
             <div class="mt-4">
               <div class="grid gap-2">
-                <label for="category" class="text-sm">Type Transaction</label>
+                <label for="type" class="text-sm">Type Transaction</label>
                 <select
                   id="type"
                   class="w-full h-full text-sm px-3 py-2.5 border-2 border-black rounded-lg focus:outline-none"
-                  required
+                  onchange="handleTransactionTypeChange()"
                 >
-                  <option value="" disabled selected hidden>Select type transaction</option>
+                  <option value="" disabled selected hidden>
+                    Select type transaction
+                  </option>
                   <option value="pemasukan">Pemasukan</option>
                   <option value="pengeluaran">Pengeluaran</option>
                 </select>
               </div>
             </div>
-            <div class="grid gap-2">
+            <div class="grid gap-2 hidden" id="category-div">
               <label for="category" class="text-sm">Category</label>
               <select
                 id="category"
                 class="w-full h-full text-sm px-3 py-2.5 border-2 border-black rounded-lg focus:outline-none"
-                required
               >
-                <option value="" disabled selected hidden>Select Category</option>
-                <option value="olahraga">Olahraga</option>
-                <option value="makanan">Makanan</option>
-                <option value="transportasi">Transportasi</option>
-                <option value="hiburan">Hiburan</option>
+                <option value="" disabled selected hidden>
+                  Select Category
+                </option>
               </select>
             </div>
             <div class="grid gap-2">
-              <label class="text-sm">Type Category</label>
+              <label for="name" class="text-sm">Name</label>
               <input
-                type="input"
-                id="tyepCategory"
+                type="text"
+                id="name"
                 class="w-full h-full text-sm px-3 py-2.5 border-2 border-black rounded-lg focus:outline-none"
-                placeholder="Type Category"
-                required
+                placeholder="Name"
               />
             </div>
             <div class="grid gap-2">
-              <label class="text-sm">Balance</label>
+              <label for="balance" class="text-sm">Balance</label>
               <input
                 type="number"
                 id="balance"
                 class="w-full h-full text-sm px-3 py-2.5 border-2 border-black rounded-lg focus:outline-none"
                 placeholder="Amount Balance"
-                required
               />
             </div>
             <div class="flex justify-end">
               <button
                 type="submit"
-                class="bg-primary text-white p-1 border-2 border-black rounded-lg flex justify-between">
+                class="bg-primary text-white p-1 border-2 border-black rounded-lg flex justify-between"
+              >
                 Submit
-                <i class="bx bx-transfer-alt bx-sm"></i>
               </button>
             </div>
           </form>
         </div>
       </div>
-      <!-- Loading spinner -->
       <div
         id="loading-spinner"
         class="flex items-center justify-center absolute inset-0 bg-white bg-opacity-75 hidden"
       >
         <div class="spinner"></div>
+      </div>
+      <div
+        id="confirmation-modal"
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden"
+      >
+        <div class="bg-white p-6 border-2 border-black rounded-lg">
+          <p id="budget-status" class="text-sm"></p>
+          <div class="flex justify-center mt-4">
+            <button
+              id="confirm-transaction"
+              class="bg-primary text-white p-1 border-2 border-black rounded-lg"
+            >
+              Confirm
+            </button>
+            <button
+              id="cancel-transaction"
+              class="ml-2 p-1 border-2 border-black rounded-lg"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -130,13 +127,12 @@
       import {
         getFirestore,
         collection,
+        addDoc,
         query,
         where,
         getDocs,
-        addDoc,
       } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
-      // Your web app's Firebase configuration
       const firebaseConfig = {
         apiKey: "AIzaSyBECIoLim1XcLVK25kYCxxwGH-_Q7W9rVo",
         authDomain: "madang-7f36d.firebaseapp.com",
@@ -146,14 +142,12 @@
         appId: "1:797478379879:web:7785922297fa426869cfc2",
       };
 
-      // Initialize Firebase
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const db = getFirestore(app);
 
       let currentUser = null;
 
-      // Check for accessToken on page load and set currentUser
       document.addEventListener("DOMContentLoaded", () => {
         const accessToken = localStorage.getItem("accessToken");
 
@@ -162,17 +156,37 @@
           return;
         }
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
           if (user) {
             currentUser = user;
+            await populateCategoryDropdown();
           } else {
             window.location.href = "/login";
           }
         });
       });
 
-      // Handle form submission
-      async function handleSubmit(event) {
+      async function populateCategoryDropdown() {
+        const categoryDropdown = document.getElementById("category");
+        categoryDropdown.innerHTML =
+          '<option value="" disabled selected hidden>Select Category</option>';
+
+        const q = query(
+          collection(db, "budgets"),
+          where("uid", "==", currentUser.uid)
+        );
+        const querySnapshot = await getDocs(q);
+
+        querySnapshot.forEach((doc) => {
+          const category = doc.data().category;
+          const option = document.createElement("option");
+          option.value = category;
+          option.textContent = category;
+          categoryDropdown.appendChild(option);
+        });
+      }
+
+      async function checkBudget(event) {
         event.preventDefault();
 
         if (!currentUser) {
@@ -180,11 +194,18 @@
           return;
         }
 
+        const type = document.getElementById("type").value;
         const category = document.getElementById("category").value;
+        const name = document.getElementById("name").value;
         const balance = document.getElementById("balance").value;
 
-        if (!category || !balance) {
-          alert("Both category and balance are required");
+        if (
+          !type ||
+          (type === "pengeluaran" && !category) ||
+          !name ||
+          !balance
+        ) {
+          alert("All fields are required");
           return;
         }
 
@@ -192,7 +213,10 @@
         loadingSpinner.classList.remove("hidden");
 
         try {
-          // Check if category already exists for the current user
+          if (type !== "pengeluaran") {
+            return;
+          }
+
           const q = query(
             collection(db, "budgets"),
             where("uid", "==", currentUser.uid),
@@ -201,32 +225,91 @@
           const querySnapshot = await getDocs(q);
 
           if (!querySnapshot.empty) {
-            alert(
-              "Category already exists. Please choose a different category."
-            );
-            loadingSpinner.classList.add("hidden");
+            const budgetDoc = querySnapshot.docs[0];
+            const budgetData = budgetDoc.data();
+
+            console.log(budgetData);
+            const budgetAmount = budgetData.balance;
+            const remainingBudget = budgetAmount - balance;
+
+            const budgetStatusElement =
+              document.getElementById("budget-status");
+
+            console.log;
+            const confirmationModal =
+              document.getElementById("confirmation-modal");
+
+            if (remainingBudget >= 0) {
+              budgetStatusElement.textContent = `Remaining budget: ${remainingBudget}`;
+            } else {
+              budgetStatusElement.textContent = `Transaction exceeds budget by ${Math.abs(
+                remainingBudget
+              )}`;
+            }
+
+            confirmationModal.classList.remove("hidden");
+          } else {
+            alert("No budget found for the selected category");
             return;
           }
-
-          // Add new budget
-          const docRef = await addDoc(collection(db, "budgets"), {
-            uid: currentUser.uid,
-            category,
-            balance: parseFloat(balance),
-          });
-          alert("Budget added successfully.");
-          window.location.href = "/budget";
-        } catch (e) {
+        } catch (error) {
           console.error("Error adding document: ", e);
-          alert("Error creating budget. Please try again.");
+          alert("Error creating transaction. Please try again.");
         } finally {
           loadingSpinner.classList.add("hidden");
         }
       }
 
+      async function submitTransaction(type, category, name, balance) {
+        try {
+          await addDoc(collection(db, "transactions"), {
+            uid: currentUser.uid,
+            type,
+            category: type === "pemasukan" ? null : category,
+            name,
+            balance: parseFloat(balance),
+          });
+          alert("Transaction added successfully.");
+          window.location.href = "/transaction";
+        } catch (e) {
+          console.error("Error adding document: ", e);
+          alert("Error creating transaction. Please try again.");
+        }
+      }
+
       document
-        .getElementById("budget-form")
-        .addEventListener("submit", handleSubmit);
+        .getElementById("transaction-form")
+        .addEventListener("submit", checkBudget);
+
+      document
+        .getElementById("confirm-transaction")
+        .addEventListener("click", async () => {
+          const type = document.getElementById("type").value;
+          const category = document.getElementById("category").value;
+          const name = document.getElementById("name").value;
+          const balance = document.getElementById("balance").value;
+
+          await submitTransaction(type, category, name, balance);
+          document.getElementById("confirmation-modal").classList.add("hidden");
+          window.location.href = "/transaction";
+        });
+
+      document
+        .getElementById("cancel-transaction")
+        .addEventListener("click", () => {
+          document.getElementById("confirmation-modal").classList.add("hidden");
+        });
+    </script>
+    <script>
+      function handleTransactionTypeChange() {
+        const type = document.getElementById("type").value;
+        const categoryDiv = document.getElementById("category-div");
+        if (type === "pemasukan") {
+          categoryDiv.classList.add("hidden");
+        } else {
+          categoryDiv.classList.remove("hidden");
+        }
+      }
     </script>
   </body>
 </html>
