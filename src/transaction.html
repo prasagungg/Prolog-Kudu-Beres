@@ -33,10 +33,6 @@
             </button>
           </div>
 
-          <div id="empty-state" class="hidden text-center p-6">
-            <p class="text-gray-600">No budget items found.</p>
-          </div>
-
           <div
             class="bg-primary rounded-lg border-2 border-black p-4 items-center"
           >
@@ -155,7 +151,6 @@
 
       const incomeList = document.getElementById("income-list");
       const expenseList = document.getElementById("expense-list");
-      const emptyState = document.getElementById("empty-state");
 
       try {
         // Query Firestore for transactions
@@ -170,27 +165,30 @@
         expenseList.innerHTML = "";
 
         // Check if there are no transactions
-        if (querySnapshot.empty) {
-          emptyState.classList.remove("hidden");
-        } else {
-          emptyState.classList.add("hidden");
-
-          // Create a number formatter for the desired format
+        if (!querySnapshot.empty) {
           const numberFormatter = new Intl.NumberFormat("id-ID");
 
           // Object to hold expenses by category
           const expensesByCategory = {};
 
+          // Create a date formatter
+          const dateFormatter = new Intl.DateTimeFormat("id-ID", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          });
+
           // Iterate over query results
           querySnapshot.forEach((doc) => {
             const data = doc.data();
             const formattedAmount = numberFormatter.format(data.balance);
+            const formattedDate = dateFormatter.format(
+              data.created_at.toDate()
+            );
 
             const transactionItem = document.createElement("div");
             transactionItem.classList.add(
-              "flex",
-              "justify-between",
-              "items-center",
               "p-3",
               "rounded-lg",
               "shadow-sm",
@@ -199,20 +197,17 @@
               data.type === "pemasukan" ? "bg-green-50" : "bg-red-50"
             );
             transactionItem.innerHTML = `
-        <div class="flex-1">
-          <span class="text-gray-800">${data.name}</span>
-          <span class="${
-            data.type === "pemasukan" ? "text-green-700" : "text-red-600"
-          } font-semibold">${
+            <div class="text-gray-500 text-sm">${formattedDate}</div>
+<div class="flex justify-between item-center">
+<span class="text-gray-800">${data.name}</span>
+<span class="${
+              data.type === "pemasukan" ? "text-green-700" : "text-red-600"
+            } font-semibold">${
               data.type === "pemasukan" ? "+" : "-"
             }${formattedAmount}</span>
-        </div>
-        <button onclick="window.location.href = '/edit-transaction?id=${
-          doc.id
-        }'">
-          <i class="bx bx-cog bx-sm text-gray-800"></i>
-        </button>
-      `;
+</div>
+
+`;
 
             if (data.type === "pemasukan") {
               incomeList.appendChild(transactionItem);
@@ -254,6 +249,10 @@
             categoryContainer.appendChild(categoryList);
             expenseList.appendChild(categoryContainer);
           });
+        } else {
+          // Handle empty state
+          const emptyState = document.getElementById("empty-state");
+          emptyState.classList.remove("hidden");
         }
       } catch (e) {
         console.error("Error loading transactions: ", e);
