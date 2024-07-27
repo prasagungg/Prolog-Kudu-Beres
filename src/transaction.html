@@ -54,6 +54,8 @@
               <ul id="expense-list" class="space-y-2"></ul>
             </div>
           </div>
+
+          <div id="empty-state" class="hidden text-center mt-6"></div>
         </div>
       </div>
       <div
@@ -164,14 +166,9 @@
         incomeList.innerHTML = "";
         expenseList.innerHTML = "";
 
-        // Check if there are no transactions
         if (!querySnapshot.empty) {
           const numberFormatter = new Intl.NumberFormat("id-ID");
-
-          // Object to hold expenses by category
           const expensesByCategory = {};
-
-          // Create a date formatter
           const dateFormatter = new Intl.DateTimeFormat("id-ID", {
             weekday: "long",
             day: "numeric",
@@ -179,7 +176,6 @@
             year: "numeric",
           });
 
-          // Iterate over query results
           querySnapshot.forEach((doc) => {
             const data = doc.data();
             const formattedAmount = numberFormatter.format(data.balance);
@@ -197,22 +193,20 @@
               data.type === "pemasukan" ? "bg-green-50" : "bg-red-50"
             );
             transactionItem.innerHTML = `
-            <div class="text-gray-500 text-sm">${formattedDate}</div>
-<div class="flex justify-between item-center">
-<span class="text-gray-800">${data.name}</span>
-<span class="${
-              data.type === "pemasukan" ? "text-green-700" : "text-red-600"
-            } font-semibold">${
+      <div class="text-gray-500 text-sm">${formattedDate}</div>
+      <div class="flex justify-between item-center">
+        <span class="text-gray-800">${data.name}</span>
+        <span class="${
+          data.type === "pemasukan" ? "text-green-700" : "text-red-600"
+        } font-semibold">${
               data.type === "pemasukan" ? "+" : "-"
             }${formattedAmount}</span>
-</div>
-
-`;
+      </div>
+      `;
 
             if (data.type === "pemasukan") {
               incomeList.appendChild(transactionItem);
             } else {
-              // Group expenses by category
               if (!expensesByCategory[data.category]) {
                 expensesByCategory[data.category] = [];
               }
@@ -220,7 +214,6 @@
             }
           });
 
-          // Append grouped expenses to the list
           Object.keys(expensesByCategory).forEach((category) => {
             const categoryContainer = document.createElement("div");
             categoryContainer.classList.add(
@@ -250,9 +243,11 @@
             expenseList.appendChild(categoryContainer);
           });
         } else {
-          // Handle empty state
+          // Handle empty state if element exists
           const emptyState = document.getElementById("empty-state");
-          emptyState.classList.remove("hidden");
+          if (emptyState) {
+            emptyState.classList.remove("hidden");
+          }
         }
       } catch (e) {
         console.error("Error loading transactions: ", e);
