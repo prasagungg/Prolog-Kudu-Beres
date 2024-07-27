@@ -166,7 +166,7 @@
 
             querySnapshot.forEach((doc) => {
               const data = doc.data();
-              const formattedBalance = numberFormatter.format(data.balance);
+              const total = numberFormatter.format(data.total);
 
               const budgetItem = document.createElement("div");
               budgetItem.classList.add(
@@ -174,20 +174,35 @@
                 "rounded-lg",
                 "border-2",
                 "border-black",
-                "p-3",
-                "flex",
-                "justify-between",
+                "p-4",
                 "items-center"
               );
+
+              // Generate category list
+              let categoryHtml = "";
+              if (data.categories && Array.isArray(data.categories)) {
+                data.categories.forEach((category) => {
+                  categoryHtml += `<div class="bg-gray-50 p-4 rounded-lg mt-4">
+                  
+                  <h3 class="font-bold">${category.category}</h3>
+                  <p class="text-sm">${numberFormatter.format(
+                    category.balance
+                  )}</p>
+                </div>`;
+                });
+              }
+
               budgetItem.innerHTML = `
-                <div>
-                  <h3 class="font-bold">${data.category}</h3>
-                  <p class="text-sm">${formattedBalance}</p>
-                </div>
-                <button onclick="window.location.href = '/edit-budget?id=${doc.id}'">
-                  <i class="bx bx-pencil bx-sm text-red"></i>
-                </button>
+              <div class="flex items-center justify-between">
+                <div class="font-bold text-xl text-gray-800">${total}</div>
+                <div class="text-xl">This ${data.periode}</div>
+              </div>
+              <div class="w-full grid gap-3">
+                ${categoryHtml}
+              </div>
+              
               `;
+
               budgetList.appendChild(budgetItem);
             });
           }

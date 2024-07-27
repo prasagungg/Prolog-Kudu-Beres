@@ -171,6 +171,9 @@
         categoryDropdown.innerHTML =
           '<option value="" disabled selected hidden>Select Category</option>';
 
+        // Use a Set to store unique categories
+        const categoriesSet = new Set();
+
         const q = query(
           collection(db, "budgets"),
           where("uid", "==", currentUser.uid)
@@ -178,10 +181,19 @@
         const querySnapshot = await getDocs(q);
 
         querySnapshot.forEach((doc) => {
-          const category = doc.data().category;
+          const categories = doc.data().categories;
+          if (categories && Array.isArray(categories)) {
+            categories.forEach((category) => categoriesSet.add(category));
+          }
+        });
+
+        // Convert Set to Array and sort if needed
+        const uniqueCategories = Array.from(categoriesSet).sort();
+
+        uniqueCategories.forEach((category) => {
           const option = document.createElement("option");
-          option.value = category;
-          option.textContent = category;
+          option.value = category.category;
+          option.textContent = category.category;
           categoryDropdown.appendChild(option);
         });
       }
@@ -197,15 +209,18 @@
         const type = document.getElementById("type").value;
         const category = document.getElementById("category").value;
         const name = document.getElementById("name").value;
-        const balance = document.getElementById("balance").value;
+        const balance = parseFloat(document.getElementById("balance").value);
 
         if (
           !type ||
           (type === "pengeluaran" && !category) ||
           !name ||
-          !balance
+          isNaN(balance) ||
+          balance <= 0
         ) {
-          alert("All fields are required");
+          alert(
+            "All fields are required and balance must be a positive number"
+          );
           return;
         }
 
@@ -220,42 +235,54 @@
 
           const q = query(
             collection(db, "budgets"),
-            where("uid", "==", currentUser.uid),
-            where("category", "==", category)
+            where("uid", "==", currentUser.uid)
           );
           const querySnapshot = await getDocs(q);
 
           if (!querySnapshot.empty) {
-            const budgetDoc = querySnapshot.docs[0];
-            const budgetData = budgetDoc.data();
+            let remainingBudget = 0;
+            let foundCategory = false;
 
-            console.log(budgetData);
-            const budgetAmount = budgetData.balance;
-            const remainingBudget = budgetAmount - balance;
+            querySnapshot.forEach((doc) => {
+              const budgetData = doc.data();
+              const categories = budgetData.categories || [];
+
+              // Find the category object with the matching category
+              const categoryObject = categories.find(
+                (cat) => cat.category === category
+              );
+
+              if (categoryObject) {
+                foundCategory = true;
+                remainingBudget = categoryObject.balance - balance;
+              }
+            });
 
             const budgetStatusElement =
               document.getElementById("budget-status");
-
-            console.log;
             const confirmationModal =
               document.getElementById("confirmation-modal");
 
-            if (remainingBudget >= 0) {
-              budgetStatusElement.textContent = `Remaining budget: ${remainingBudget}`;
+            if (foundCategory) {
+              if (remainingBudget >= 0) {
+                budgetStatusElement.textContent = `Remaining budget: ${Intl.NumberFormat(
+                  "id-ID"
+                ).format(remainingBudget)}`;
+              } else {
+                budgetStatusElement.textContent = `Transaction exceeds budget by ${Intl.NumberFormat(
+                  "id-ID"
+                ).format(Math.abs(remainingBudget))}`;
+              }
+              confirmationModal.classList.remove("hidden");
             } else {
-              budgetStatusElement.textContent = `Transaction exceeds budget by ${Math.abs(
-                remainingBudget
-              )}`;
+              alert("No budget found for the selected category");
             }
-
-            confirmationModal.classList.remove("hidden");
           } else {
             alert("No budget found for the selected category");
-            return;
           }
         } catch (error) {
-          console.error("Error adding document: ", e);
-          alert("Error creating transaction. Please try again.");
+          console.error("Error checking budget: ", error);
+          alert("Error checking budget. Please try again.");
         } finally {
           loadingSpinner.classList.add("hidden");
         }
