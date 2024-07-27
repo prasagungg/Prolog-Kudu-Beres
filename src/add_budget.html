@@ -52,27 +52,63 @@
             ></i>
             <h3 class="text-xl font-bold">Create Budget</h3>
           </div>
+
           <form id="budget-form" class="grid gap-4">
             <div class="grid gap-2">
-              <label class="text-sm">Category</label>
+              <label class="text-sm">Total Balance</label>
               <input
                 type="input"
-                id="category"
+                id="total-balance"
                 class="w-full h-full text-sm px-3 py-2.5 border-2 border-black rounded-lg focus:outline-none"
-                placeholder="Name Category"
+                placeholder="Total Balance"
                 required
               />
             </div>
+
             <div class="grid gap-2">
-              <label class="text-sm">Balance</label>
-              <input
-                type="number"
-                id="balance"
+              <label for="periode" class="text-sm">Periode</label>
+              <select
+                id="periode"
                 class="w-full h-full text-sm px-3 py-2.5 border-2 border-black rounded-lg focus:outline-none"
-                placeholder="Amount Balance"
-                required
-              />
+              >
+                <option value="" disabled selected hidden>
+                  Select Periode
+                </option>
+                <option value="month">This Month</option>
+                <option value="year">This Year</option>
+              </select>
             </div>
+            <div id="categories-container" class="grid gap-4">
+              <div class="flex justify-between items-center">
+                <h3 class="text-xl font-bold">Categories</h3>
+                <button id="add-category">
+                  <i class="bx bx-plus-circle bx-sm"></i>
+                </button>
+              </div>
+
+              <div class="category-fields grid gap-4">
+                <div class="grid gap-2">
+                  <label class="text-sm">Category</label>
+                  <input
+                    type="text"
+                    class="w-full text-sm px-3 py-2.5 border-2 border-black rounded-lg focus:outline-none"
+                    placeholder="Name Category"
+                    required
+                  />
+                </div>
+                <div class="grid gap-2">
+                  <label class="text-sm">Balance</label>
+                  <input
+                    type="number"
+                    class="w-full text-sm px-3 py-2.5 border-2 border-black rounded-lg focus:outline-none"
+                    placeholder="Amount Balance"
+                    required
+                  />
+                </div>
+                <span class="remove-field hidden">Remove</span>
+              </div>
+            </div>
+
             <div class="flex justify-end">
               <button
                 type="submit"
@@ -152,11 +188,39 @@
           return;
         }
 
-        const category = document.getElementById("category").value;
-        const balance = document.getElementById("balance").value;
+        const totalBalance = parseFloat(
+          document.getElementById("total-balance").value
+        );
+        const periode = document.getElementById("periode").value;
 
-        if (!category || !balance) {
-          alert("Both category and balance are required");
+        if (isNaN(totalBalance) || totalBalance <= 0 || !periode) {
+          alert("Valid total balance and periode are required");
+          return;
+        }
+
+        const categoryFields = document.querySelectorAll(".category-fields");
+        const budgets = [];
+
+        let totalCategoryBalance = 0;
+        categoryFields.forEach((field) => {
+          const category = field.querySelector("input[type='text']").value;
+          const balance = Number(
+            field.querySelector("input[type='number']").value
+          );
+
+          if (category && !isNaN(balance) && balance > 0) {
+            budgets.push({ category, balance });
+            totalCategoryBalance += Number(balance);
+          }
+        });
+
+        if (budgets.length === 0) {
+          alert("At least one category and balance are required");
+          return;
+        }
+
+        if (totalCategoryBalance > totalBalance) {
+          alert("The total balance of categories exceeds the total balance");
           return;
         }
 
@@ -164,29 +228,32 @@
         loadingSpinner.classList.remove("hidden");
 
         try {
-          // Check if category already exists for the current user
-          const q = query(
-            collection(db, "budgets"),
-            where("uid", "==", currentUser.uid),
-            where("category", "==", category)
-          );
-          const querySnapshot = await getDocs(q);
-
-          if (!querySnapshot.empty) {
-            alert(
-              "Category already exists. Please choose a different category."
+          for (const budget of budgets) {
+            // Check if category already exists for the current user
+            const q = query(
+              collection(db, "budgets"),
+              where("uid", "==", currentUser.uid),
+              where("category", "==", budget.category)
             );
-            loadingSpinner.classList.add("hidden");
-            return;
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+              alert(
+                `Category "${budget.category}" already exists. Please choose a different category.`
+              );
+              loadingSpinner.classList.add("hidden");
+              return;
+            }
           }
 
-          // Add new budget
-          const docRef = await addDoc(collection(db, "budgets"), {
+          await addDoc(collection(db, "budgets"), {
             uid: currentUser.uid,
-            category,
-            balance: parseFloat(balance),
+            total: Number(totalBalance),
+            periode,
+            categories: budgets,
           });
-          alert("Budget added successfully.");
+
+          alert("Budgets added successfully.");
           window.location.href = "/budget";
         } catch (e) {
           console.error("Error adding document: ", e);
@@ -195,6 +262,34 @@
           loadingSpinner.classList.add("hidden");
         }
       }
+
+      // Add new category fields
+      document.getElementById("add-category").addEventListener("click", () => {
+        const container = document.getElementById("categories-container");
+        const newField = document.createElement("div");
+        newField.className = "category-fields grid gap-4";
+        newField.innerHTML = `
+                <div class="grid gap-2">
+                  <div class="flex items-center justify-between">
+                    <label class="text-sm">Category</label>
+                    <span class="remove-field">Remove</span>  
+                  </div>
+                    <input type="text" class="w-full text-sm px-3 py-2.5 border-2 border-black rounded-lg focus:outline-none" placeholder="Name Category" required />
+                </div>
+                <div class="grid gap-2">
+                    <label class="text-sm">Balance</label>
+                    <input type="number" class="w-full text-sm px-3 py-2.5 border-2 border-black rounded-lg focus:outline-none" placeholder="Amount Balance" required />
+                </div>
+            `;
+        container.appendChild(newField);
+
+        // Add remove functionality
+        newField
+          .querySelector(".remove-field")
+          .addEventListener("click", () => {
+            container.removeChild(newField);
+          });
+      });
 
       document
         .getElementById("budget-form")
